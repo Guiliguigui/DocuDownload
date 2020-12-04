@@ -1,2 +1,2 @@
 # DocuDownload
-Application Web pour télécharger une archive .zip contenant un  ensemble de documents provenant d'une armoire Docuware
+Application Web pour télécharger une archive .zip contenant un ensemble de documents provenants d'une armoire Docuware.
