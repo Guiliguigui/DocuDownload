@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using DocuDownload.Models;
+using DocuWare.Platform.ServerClient;
 
 namespace DocuDownload.Controllers
 {
@@ -17,19 +18,12 @@ namespace DocuDownload.Controllers
 
         public IActionResult About()
         {
-            ViewData["Message"] = "Your application description page.";
+            ViewData["Message"] = "Application Web pour télécharger une archive .zip contenant un ensemble de documents provenants d'une armoire Docuware.";
 
             return View();
         }
 
         public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
-
-        public IActionResult Privacy()
         {
             return View();
         }
@@ -38,6 +32,31 @@ namespace DocuDownload.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult DownloadZip(string docuwareURL = "http://localhost/docuware/platform",
+                                         string login = "admin",
+                                         string password = "admin",
+                                         string fcName = "Blandine company",
+                                         string dialogName = "ZipDownload")
+        {
+            string zipName = fcName + " - " + DateTimeOffset.Now.Date.ToString("dd.MM.yyy") + " - Downloaded by " + login + ".zip";
+
+            Uri uri = new Uri(docuwareURL);
+            ServiceConnection conn = ServiceConnection.Create(uri, login, password);
+
+            Organization org = conn.Organizations[0];
+            List<FileCabinet> fileCabinets = org.GetFileCabinetsFromFilecabinetsRelation().FileCabinet;
+            FileCabinet fileCabinet = Functions.GetFileCabinetByName(fileCabinets, fcName);
+
+            DialogInfos dialogInfoItems = fileCabinet.GetDialogInfosFromSearchesRelation();
+            Dialog dialog = Functions.GetDialogByName(dialogInfoItems, dialogName);
+            
+            List<Document> documents = Functions.SearchDocuments(dialog);
+
+            var zipStream = Functions.GetZipStream(conn, documents);
+
+            return File(zipStream, "application/octet-stream", zipName);
         }
     }
 }

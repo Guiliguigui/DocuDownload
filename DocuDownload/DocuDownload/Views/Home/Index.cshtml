@@ -1,5 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    //string login = "admin";
+    //string zipName = DateTimeOffset.Now.Date.ToString("dd.MM.yyy HH.mm") + " - Downloaded by " + login + ".zip";
 }
 
 <div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="6000">
@@ -94,7 +96,7 @@
 </div>
 
 <div>
-    <a class="btn btn-default" href="javascript: downloadZip()">
+    <a asp-area="" asp-controller="Home" asp-action="DownloadZip" class="btn btn-default">
         TEST DOWNLOAD
     </a>
 </div>
