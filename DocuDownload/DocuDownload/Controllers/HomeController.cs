@@ -34,6 +34,23 @@ namespace DocuDownload.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        [HttpPost]
+        public IActionResult Connect(string docuwareURL = "http://localhost/docuware/platform", string login = "admin", string password = "admin")
+        {
+            try
+            {
+                Uri uri = new Uri(docuwareURL);
+                ServiceConnection.Create(uri, login, password);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+
+            return Ok();
+        }
+
+        [HttpPost]
         public IActionResult DownloadZip(string docuwareURL = "http://localhost/docuware/platform",
                                          string login = "admin",
                                          string password = "admin",
