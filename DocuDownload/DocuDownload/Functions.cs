@@ -12,23 +12,40 @@ namespace DocuDownload
 {
     public static class Functions
     {
+        public static List<string> GetAllOrganizationNames(ServiceConnection connection)
+        {
+            return connection.Organizations.Select(p => p.Name).ToList();
+        }
+
+        public static List<string> GetAllFileCabinetNames(Organization organization)
+        {
+            return organization.GetFileCabinetsFromFilecabinetsRelation().FileCabinet.Select(p => p.Name).ToList();
+        }
+
+        public static List<string> GetAllDialogNames(FileCabinet fileCabinet)
+        {
+            return fileCabinet.GetDialogInfosFromSearchesRelation().Dialog.Select(p => p.GetDialogFromSelfRelation().DisplayName).ToList();
+        }
+        
         public static FileCabinet GetFileCabinetByName(List<FileCabinet> fileCabinets, string fcName)
         {
-            FileCabinet fileCabinet = new FileCabinet();
+            FileCabinet fileCabinet = null;
             foreach (var fc in fileCabinets)
                 if (fc.Name == fcName)
                     fileCabinet = fc;
+            if (fileCabinet == null)
+                throw new Exception("File cabinet not found.");
             return fileCabinet;
         }
 
         public static Dialog GetDialogByName(DialogInfos dialogInfoItems, string dialogName)
         {
-            Dialog dialog = new Dialog();
+            Dialog dialog = null;
             foreach (var dia in dialogInfoItems.Dialog)
-            {
                 if (dia.GetDialogFromSelfRelation().DisplayName == dialogName)
                     dialog = dia.GetDialogFromSelfRelation();
-            }
+            if (dialog == null)
+                throw new Exception("Dialog not found.");
             return dialog;
         }
 
@@ -84,14 +101,6 @@ namespace DocuDownload
             {
                 this.Name = name;
                 this.Content = content;
-            }
-            public ZipItem(string name, string contentStr, Encoding encoding)
-            {
-                // convert string to stream
-                var byteArray = encoding.GetBytes(contentStr);
-                var memoryStream = new MemoryStream(byteArray);
-                this.Name = name;
-                this.Content = memoryStream;
             }
         }
 
