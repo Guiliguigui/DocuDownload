@@ -29,19 +29,16 @@ namespace DocuDownload
         
         public static FileCabinet GetFileCabinetByName(List<FileCabinet> fileCabinets, string fcName)
         {
-            FileCabinet fileCabinet = null;
-            foreach (var fc in fileCabinets)
-                if (fc.Name == fcName)
-                    fileCabinet = fc;
+            FileCabinet fileCabinet = fileCabinets.Where(i => i.Name == fcName).FirstOrDefault();
             if (fileCabinet == null)
                 throw new Exception("File cabinet not found.");
             return fileCabinet;
         }
 
-        public static Dialog GetDialogByName(DialogInfos dialogInfoItems, string dialogName)
+        public static Dialog GetDialogByName(DialogInfos dialogInfos, string dialogName)
         {
             Dialog dialog = null;
-            foreach (var dia in dialogInfoItems.Dialog)
+            foreach (var dia in dialogInfos.Dialog)
                 if (dia.GetDialogFromSelfRelation().DisplayName == dialogName)
                     dialog = dia.GetDialogFromSelfRelation();
             if (dialog == null)
@@ -49,14 +46,16 @@ namespace DocuDownload
             return dialog;
         }
 
-        public static List<string> GetVisiblesFieldsNames(Dialog dialog)
+        public static List<string> GetVisiblesFieldsNames(Dialog dialog) //à modifier pour avoir ne nom dans la db, le type et le label de chaque champ
         {
-            List<string> fieldsNames = new List<string>();
-            foreach (var field in dialog.Fields)
-            {
-                if (field.Visible)
-                    fieldsNames.Add(field.DBFieldName.ToString());
-            }
+            List<string> fieldsNames = dialog.Fields.Where(p => p.Visible).Select(p => p.DlgLabel.ToString()).ToList();
+            //foreach (var field in dialog.Fields)
+            //{
+            //    if (field.Visible)
+            //        fieldsNames.Add(field.DlgLabel.ToString());
+            //        //fieldsNames.Add(field.DBFieldName.ToString());
+            //        //fieldsNames.Add(field.DWFieldType.ToString());
+            //}
             return fieldsNames;
         }
 
