@@ -10,35 +10,81 @@ using System.Text;
 
 namespace DocuDownload
 {
-    public static class Functions
+    static class Functions
     {
+        /// <summary> 
+        /// Récupère la liste des Organisations.
+        /// </summary> 
+        /// <param name="connection">Connexion à la plateforme DocuWare</param> 
+        /// <returns>Liste des Organisations</returns>
         public static List<string> GetAllOrganizationNames(ServiceConnection connection)
         {
             return connection.Organizations.Select(p => p.Name).ToList();
         }
 
+        /// <summary> 
+        /// Récupère une organisation d'une connexion avec son nom.
+        /// </summary> 
+        /// <param name="connection">Connexion</param> 
+        /// <param name="orgName">Nom d'une organisation</param> 
+        /// <returns>Organisation</returns>
+        /// <exception>Lorsque l'organisation n'existe pas/exception>
+        public static Organization GetOrganizationByName(ServiceConnection connection, string orgName)
+        {
+            Organization organization = connection.Organizations.Where(i => i.Name == orgName).FirstOrDefault();
+            if (organization == null)
+                throw new Exception("Organization not found.");
+            return organization;
+        }
+
+        /// <summary> 
+        /// Récupère la liste des Armoires d'une Organisation.
+        /// </summary> 
+        /// <param name="organization">Organisation</param> 
+        /// <returns>Liste des Armoires</returns>
         public static List<string> GetAllFileCabinetNames(Organization organization)
         {
             return organization.GetFileCabinetsFromFilecabinetsRelation().FileCabinet.Select(p => p.Name).ToList();
         }
 
-        public static List<string> GetAllDialogNames(FileCabinet fileCabinet)
+        /// <summary> 
+        /// Récupère une armoire d'une organisation avec son nom.
+        /// </summary> 
+        /// <param name="organization">Organisation</param> 
+        /// <param name="fileCabinetName">Nom d'une armoire</param> 
+        /// <returns>Armoire</returns>
+        /// <exception>Lorsque l'armoire n'existe pas</exception>
+        public static FileCabinet GetFileCabinetByName(Organization organization, string fileCabinetName)
         {
-            return fileCabinet.GetDialogInfosFromSearchesRelation().Dialog.Select(p => p.GetDialogFromSelfRelation().DisplayName).ToList();
-        }
-
-        public static FileCabinet GetFileCabinetByName(List<FileCabinet> fileCabinets, string fcName)
-        {
-            FileCabinet fileCabinet = fileCabinets.Where(i => i.Name == fcName).FirstOrDefault();
+            List<FileCabinet> fileCabinets = organization.GetFileCabinetsFromFilecabinetsRelation().FileCabinet;
+            FileCabinet fileCabinet = fileCabinets.Where(i => i.Name == fileCabinetName).FirstOrDefault();
             if (fileCabinet == null)
                 throw new Exception("File cabinet not found.");
             return fileCabinet;
         }
 
-        public static Dialog GetDialogByName(DialogInfos dialogInfos, string dialogName)
+        /// <summary> 
+        /// Récupère la liste des Boites de recherche d'une Armoire.
+        /// </summary> 
+        /// <param name="fileCabinet">Armoire</param> 
+        /// <returns>Liste des Boites de recherche</returns>
+        public static List<string> GetAllDialogNames(FileCabinet fileCabinet)
         {
+            return fileCabinet.GetDialogInfosFromSearchesRelation().Dialog.Select(p => p.GetDialogFromSelfRelation().DisplayName).ToList();
+        }
+
+        /// <summary> 
+        /// Récupère une boite de recherche avec son nom.
+        /// </summary> 
+        /// <param name="fileCabinet">Armoire</param> 
+        /// <param name="dialogName">Nom d'une boite de recherche</param> 
+        /// <returns>Boite de recherche</returns>
+        /// <exception>Lorsque la boite de recherche n'existe pas/exception>
+        public static Dialog GetDialogByName(FileCabinet fileCabinet, string dialogName)
+        {
+            DialogInfos dialogInfoItems = fileCabinet.GetDialogInfosFromSearchesRelation();
             Dialog dialog = null;
-            foreach (var dia in dialogInfos.Dialog)
+            foreach (var dia in dialogInfoItems.Dialog)
                 if (dia.GetDialogFromSelfRelation().DisplayName == dialogName)
                     dialog = dia.GetDialogFromSelfRelation();
             if (dialog == null)
@@ -59,7 +105,7 @@ namespace DocuDownload
             return fieldsNames;
         }
 
-        public static List<Document> SearchDocuments(Dialog dialog, Dictionary<string, string> conditions = null, DialogExpressionOperation operation = DialogExpressionOperation.And, int count = 1000000, SortDirection sortDirection = SortDirection.Desc)
+        public static List<Document> SearchDocuments(Dialog dialog, Dictionary<string, string> conditions = null, int count = 1000000, SortDirection sortDirection = SortDirection.Desc)
         //à modifier pour recherche avec plusieurs données pour un champ
         {
             if (conditions == null)
@@ -67,7 +113,7 @@ namespace DocuDownload
 
             var q = new DialogExpression()
             {
-                Operation = operation,
+                Operation = DialogExpressionOperation.And,
                 Condition = new List<DialogExpressionCondition>(),
                 Count = count,
                 SortOrder = new List<SortedField>
@@ -93,7 +139,10 @@ namespace DocuDownload
             return result;
         }
 
-        public class ZipItem
+        /// <summary> 
+        /// Classe représentant un élément d'une archive zip.
+        /// </summary> 
+        private class ZipItem
         {
             public string Name { get; set; }
             public Stream Content { get; set; }
@@ -104,7 +153,12 @@ namespace DocuDownload
             }
         }
 
-        public static ZipItem DownloadDocumentContent(this Document document)
+        /// <summary> 
+        /// Transforme un document DocuWare en élément d'archive zip.
+        /// </summary> 
+        /// <param name="document">Document DocuWare</param> 
+        /// <returns>Elément de l'archive zip</returns>
+        private static ZipItem DownloadDocumentContent(this Document document)
         {
             if (document.FileDownloadRelationLink == null)
                 document = document.GetDocumentFromSelfRelation();
@@ -120,7 +174,12 @@ namespace DocuDownload
             return new ZipItem(downloadResponse.GetFileName(), downloadResponse.Content);
         }
 
-        public static Stream Zip(List<ZipItem> zipItems)
+        /// <summary> 
+        /// Crée le flux de l'archive zip à partir des éléments la composant.
+        /// </summary> 
+        /// <param name="zipItems">Liste des éléments de l'archive</param> 
+        /// <returns>Stream du fichier zip</returns>
+        private static Stream Zip(List<ZipItem> zipItems)
         {
             var zipStream = new MemoryStream();
 
@@ -139,51 +198,57 @@ namespace DocuDownload
             return zipStream;
         }
 
-        public static string ExistFileIncrement(string filePath, List<ZipItem> zipItems)
+        /// <summary> 
+        /// Renomme un document lorsqu'un autre document avec le même nom existe dans l'archive.
+        /// </summary> 
+        /// <param name="filePath">Chemin relatif du document dans l'archive</param> 
+        /// <param name="zipItems">Liste des fichiers de l'archive</param> 
+        /// <returns>Nouveau chemin relatif du document</returns>
+        private static string ExistFileIncrement(string filePath, List<ZipItem> zipItems)
         {
             string fileName_current = filePath;
             int count = 0;
             while (zipItems.Where(p => p.Name == fileName_current).Count() > 0)
             {
                 count++;
-                fileName_current = Path.GetDirectoryName(filePath)
-                                 + Path.DirectorySeparatorChar
-                                 + Path.GetFileNameWithoutExtension(filePath)
-                                 + " (" + count.ToString() + ")"
-                                 + Path.GetExtension(filePath);
+                if (Path.GetDirectoryName(filePath) == "")
+                    fileName_current = Path.GetFileNameWithoutExtension(filePath)
+                                     + " (" + count.ToString() + ")"
+                                     + Path.GetExtension(filePath);
+                else
+                    fileName_current = Path.GetDirectoryName(filePath)
+                                     + Path.DirectorySeparatorChar
+                                     + Path.GetFileNameWithoutExtension(filePath)
+                                     + " (" + count.ToString() + ")"
+                                     + Path.GetExtension(filePath);
             }
             return fileName_current;
         }
 
-        public static Stream GetZipStream(ServiceConnection connection, List<Document> documents)
+        /// <summary> 
+        /// Crée le flux de l'archive zip corespondant à la liste de documents avec la hierarchie de fichiers choisie.
+        /// </summary> 
+        /// <param name="documents">Liste des documents</param> 
+        /// <param name="hierarchy">Liste correspondant au classement des documents en dossiers et sous dossiers</param> 
+        /// <returns>Stream du fichier zip</returns>
+        public static Stream GetZipStream(List<Document> documents, List<string> hierarchy = null)
         {
             List<ZipItem> zipItems = new List<ZipItem>();
 
             foreach (Document document in documents)
             {
-                ZipItem zipItem = DownloadDocumentContent(document);
-                zipItem.Name = ExistFileIncrement(zipItem.Name, zipItems);
-                zipItems.Add(zipItem);
-            }
-
-            return Zip(zipItems);
-        }
-
-        public static Stream GetZipStreamWithFileHierarchy(ServiceConnection connection, List<Document> documents, List<string> hierarchy)
-        {
-            List<ZipItem> zipItems = new List<ZipItem>();
-
-            foreach (Document document in documents)
-            {
-                List<DocumentIndexField> fields = document.Fields;
                 string documentPath = "";
-                foreach (string fieldName in hierarchy)
+                if (hierarchy != null)
                 {
-                    object item = fields.Where(p => p.FieldName == fieldName).Select(p => p.Item).FirstOrDefault();
-                    if (item == null)
-                        documentPath += @"Unnamed/";
-                    else
-                        documentPath += item.ToString() + @"/";
+                    List<DocumentIndexField> fields = document.Fields;
+                    foreach (string fieldName in hierarchy)
+                    {
+                        object item = fields.Where(p => p.FieldName == fieldName).Select(p => p.Item).FirstOrDefault();
+                        if (item == null)
+                            documentPath += @"Unnamed\";
+                        else
+                            documentPath += item.ToString() + @"\";
+                    }
                 }
                 ZipItem zipItem = DownloadDocumentContent(document);
                 zipItem.Name = ExistFileIncrement(documentPath + zipItem.Name, zipItems);

@@ -63,15 +63,21 @@ namespace DocuDownload.Controllers
             ServiceConnection conn = ServiceConnection.Create(uri, login, password);
 
             Organization org = conn.Organizations[0];
-            List<FileCabinet> fileCabinets = org.GetFileCabinetsFromFilecabinetsRelation().FileCabinet;
-            FileCabinet fileCabinet = Functions.GetFileCabinetByName(fileCabinets, fcName);
 
-            DialogInfos dialogInfoItems = fileCabinet.GetDialogInfosFromSearchesRelation();
-            Dialog dialog = Functions.GetDialogByName(dialogInfoItems, dialogName);
+            FileCabinet fileCabinet = Functions.GetFileCabinetByName(org, fcName);
+            
+            Dialog dialog = Functions.GetDialogByName(fileCabinet, dialogName);
             
             List<Document> documents = Functions.SearchDocuments(dialog);
 
-            var zipStream = Functions.GetZipStream(conn, documents);
+            List<string> hierarchy = new List<string>()
+            {
+                "CHAPITRE",
+                "SOUS_CHAPITRE",
+                "TYPE_DOCUMENT"
+            };
+
+            var zipStream = Functions.GetZipStream(documents, hierarchy);
 
             return File(zipStream, "application/octet-stream", zipName);
         }
