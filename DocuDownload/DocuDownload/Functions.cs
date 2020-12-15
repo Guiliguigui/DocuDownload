@@ -26,7 +26,7 @@ namespace DocuDownload
         {
             return fileCabinet.GetDialogInfosFromSearchesRelation().Dialog.Select(p => p.GetDialogFromSelfRelation().DisplayName).ToList();
         }
-        
+
         public static FileCabinet GetFileCabinetByName(List<FileCabinet> fileCabinets, string fcName)
         {
             FileCabinet fileCabinet = fileCabinets.Where(i => i.Name == fcName).FirstOrDefault();
@@ -60,6 +60,7 @@ namespace DocuDownload
         }
 
         public static List<Document> SearchDocuments(Dialog dialog, Dictionary<string, string> conditions = null, DialogExpressionOperation operation = DialogExpressionOperation.And, int count = 1000000, SortDirection sortDirection = SortDirection.Desc)
+        //à modifier pour recherche avec plusieurs données pour un champ
         {
             if (conditions == null)
                 conditions = new Dictionary<string, string>();
@@ -138,16 +139,18 @@ namespace DocuDownload
             return zipStream;
         }
 
-        public static string ExistFileIncrement(string fileName, List<ZipItem> zipItems)
+        public static string ExistFileIncrement(string filePath, List<ZipItem> zipItems)
         {
-            string fileName_current = fileName;
+            string fileName_current = filePath;
             int count = 0;
             while (zipItems.Where(p => p.Name == fileName_current).Count() > 0)
             {
                 count++;
-                fileName_current = Path.GetFileNameWithoutExtension(fileName)
+                fileName_current = Path.GetDirectoryName(filePath)
+                                 + Path.DirectorySeparatorChar
+                                 + Path.GetFileNameWithoutExtension(filePath)
                                  + " (" + count.ToString() + ")"
-                                 + Path.GetExtension(fileName);
+                                 + Path.GetExtension(filePath);
             }
             return fileName_current;
         }
@@ -162,8 +165,33 @@ namespace DocuDownload
                 zipItem.Name = ExistFileIncrement(zipItem.Name, zipItems);
                 zipItems.Add(zipItem);
             }
-            
+
             return Zip(zipItems);
         }
+
+        public static Stream GetZipStreamWithFileHierarchy(ServiceConnection connection, List<Document> documents, List<string> hierarchy)
+        {
+            List<ZipItem> zipItems = new List<ZipItem>();
+
+            foreach (Document document in documents)
+            {
+                List<DocumentIndexField> fields = document.Fields;
+                string documentPath = "";
+                foreach (string fieldName in hierarchy)
+                {
+                    object item = fields.Where(p => p.FieldName == fieldName).Select(p => p.Item).FirstOrDefault();
+                    if (item == null)
+                        documentPath += @"Unnamed/";
+                    else
+                        documentPath += item.ToString() + @"/";
+                }
+                ZipItem zipItem = DownloadDocumentContent(document);
+                zipItem.Name = ExistFileIncrement(documentPath + zipItem.Name, zipItems);
+                zipItems.Add(zipItem);
+            }
+
+            return Zip(zipItems);
+        }
+
     }
 }
