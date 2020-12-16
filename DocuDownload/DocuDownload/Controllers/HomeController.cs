@@ -37,17 +37,10 @@ namespace DocuDownload.Controllers
         [HttpPost]
         public IActionResult Connect(string docuwareURL = "http://localhost/docuware/platform", string login = "admin", string password = "admin")
         {
-            try
-            {
-                Uri uri = new Uri(docuwareURL);
-                ServiceConnection.Create(uri, login, password);
-            }
-            catch (Exception)
-            {
+            if (Functions.GetConnection(docuwareURL, login, password) == null)
                 return NotFound();
-            }
-
-            return Ok();
+            else
+                return Ok();
         }
 
         [HttpPost]

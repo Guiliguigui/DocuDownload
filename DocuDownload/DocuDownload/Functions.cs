@@ -13,6 +13,26 @@ namespace DocuDownload
     static class Functions
     {
         /// <summary> 
+        /// Test la connexion correspondant aux identifiants et la renvoie si elle est valide.
+        /// </summary> 
+        /// <param name="docuwareURL">URL de la plateforme Docuware</param> 
+        /// <param name="login">Identifiant de l'utilisateur</param> 
+        /// <param name="password">Mot de passe de l'utilisateur</param> 
+        /// <returns>Connexion</returns>
+        public static ServiceConnection GetConnection(string docuwareURL, string login, string password)
+        {
+            try
+            {
+                Uri uri = new Uri(docuwareURL);
+                return ServiceConnection.Create(uri, login, password);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary> 
         /// Récupère la liste des Organisations.
         /// </summary> 
         /// <param name="connection">Connexion à la plateforme DocuWare</param> 
