@@ -1,0 +1,13 @@
+{
+    "DialogName": "ZipDownload",
+    "DocuwareURI": "http://localhost/docuware/platform",
+    "Fields": {
+        "STOKE_PAR": "admin"
+    },
+    "FileCabinetName": "Blandine company",
+    "Hierarchy": [ "CHAPITRE", "SOUS_CHAPITRE", "TYPE_DOCUMENT" ],
+    "Name": "TestExtraction",
+    "Organization": null,
+    "UserLogin": "admin",
+    "UserPassword": "admin"
+}

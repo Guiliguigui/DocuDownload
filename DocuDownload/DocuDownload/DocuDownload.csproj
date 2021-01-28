@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Extractions\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
 

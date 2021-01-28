@@ -53,7 +53,7 @@ namespace DocuDownload
         {
             Organization organization = connection.Organizations.Where(i => i.Name == orgName).FirstOrDefault();
             if (organization == null)
-                throw new Exception("Organization not found.");
+                Console.WriteLine("Organization not found.");
             return organization;
         }
 
@@ -79,7 +79,7 @@ namespace DocuDownload
             List<FileCabinet> fileCabinets = organization.GetFileCabinetsFromFilecabinetsRelation().FileCabinet;
             FileCabinet fileCabinet = fileCabinets.Where(i => i.Name == fileCabinetName).FirstOrDefault();
             if (fileCabinet == null)
-                throw new Exception("File cabinet not found.");
+                Console.WriteLine("File cabinet not found.");
             return fileCabinet;
         }
 
@@ -108,7 +108,7 @@ namespace DocuDownload
                 if (dia.GetDialogFromSelfRelation().DisplayName == dialogName)
                     dialog = dia.GetDialogFromSelfRelation();
             if (dialog == null)
-                throw new Exception("Dialog not found.");
+                Console.WriteLine("Dialog not found.");
             return dialog;
         }
 
@@ -125,7 +125,7 @@ namespace DocuDownload
             return fieldsNames;
         }
 
-        public static List<Document> SearchDocuments(Dialog dialog, Dictionary<string, string> conditions = null, int count = 1000000, SortDirection sortDirection = SortDirection.Desc)
+        public static List<Document> SearchDocuments(Dialog dialog, Dictionary<string, string> conditions = null) //int count = 1000000, SortDirection sortDirection = SortDirection.Desc)
         //à modifier pour recherche avec plusieurs données pour un champ
         {
             if (conditions == null)
@@ -135,16 +135,17 @@ namespace DocuDownload
             {
                 Operation = DialogExpressionOperation.And,
                 Condition = new List<DialogExpressionCondition>(),
-                Count = count,
+                //Count = count,
                 SortOrder = new List<SortedField>
                 {
-                    SortedField.Create("DWSTOREDATETIME", sortDirection)
+                    SortedField.Create("DWSTOREDATETIME", SortDirection.Desc)
                 }
             };
 
             foreach (KeyValuePair<string, string> entry in conditions)
             {
                 q.Condition.Add(DialogExpressionCondition.Create(entry.Key, entry.Value));
+                //SortedField.Create(fieldName, valueFrom, valueTo) valeur dans un interval
             }
 
             var queryResult = dialog.GetDocumentsResult(q);
