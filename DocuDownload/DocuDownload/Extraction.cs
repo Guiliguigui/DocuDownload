@@ -7,7 +7,15 @@ namespace DocuDownload
 {
     public class Extraction
     {
-        public Extraction(string name, string docuwareURI, string userLogin, string userPassword, string organization, string fileCabinetName, string dialogName, List<string> hierarchy, Dictionary<string, string> fields)
+        public Extraction(string name, 
+                          string docuwareURI, 
+                          string userLogin, 
+                          string userPassword, 
+                          string organization, 
+                          string fileCabinetName, 
+                          string dialogName, 
+                          List<string> hierarchy, 
+                          Dictionary<string, string> fields)
         {
             Name = name;
             DocuwareURI = docuwareURI;
