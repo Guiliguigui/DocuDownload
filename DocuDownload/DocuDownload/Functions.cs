@@ -112,21 +112,26 @@ namespace DocuDownload
             return dialog;
         }
 
-        public static List<string> GetVisiblesFieldsNames(Dialog dialog) //à modifier pour avoir ne nom dans la db, le type et le label de chaque champ
+        /// <summary>
+        /// Retourne tout les champs visibles d'une boite de dialogue.
+        /// </summary>
+        /// <param name="dialog">Boite de recherche</param>
+        /// <returns>Le nom du champ associé avec son label et son type.</returns>
+        public static Dictionary<string,string[]> GetVisiblesFieldsInfos(Dialog dialog)
         {
-            List<string> fieldsNames = dialog.Fields.Where(p => p.Visible).Select(p => p.DlgLabel.ToString()).ToList();
-            //foreach (var field in dialog.Fields)
-            //{
-            //    if (field.Visible)
-            //        fieldsNames.Add(field.DlgLabel.ToString());
-            //        //fieldsNames.Add(field.DBFieldName.ToString());
-            //        //fieldsNames.Add(field.DWFieldType.ToString());
-            //}
+            Dictionary<string, string[]> fieldsNames = new Dictionary<string, string[]>();
+            foreach (var field in dialog.Fields)
+            {
+                if (field.Visible)
+                {
+                    fieldsNames.Add(field.DBFieldName.ToString(), new string [2] { field.DlgLabel.ToString(), field.DWFieldType.ToString()});
+                }
+            }
             return fieldsNames;
         }
 
         public static List<Document> SearchDocuments(Dialog dialog, Dictionary<string, string> conditions = null) //int count = 1000000, SortDirection sortDirection = SortDirection.Desc)
-        //à modifier pour recherche avec plusieurs données pour un champ
+        //à modifier pour recherche avec plusieurs données pour un champ et pour recherche entre 2 dates
         {
             if (conditions == null)
                 conditions = new Dictionary<string, string>();
@@ -145,7 +150,7 @@ namespace DocuDownload
             foreach (KeyValuePair<string, string> entry in conditions)
             {
                 q.Condition.Add(DialogExpressionCondition.Create(entry.Key, entry.Value));
-                //SortedField.Create(fieldName, valueFrom, valueTo) valeur dans un interval
+                //SortedField.Create(fieldName, valueFrom, valueTo) date dans un interval
             }
 
             var queryResult = dialog.GetDocumentsResult(q);

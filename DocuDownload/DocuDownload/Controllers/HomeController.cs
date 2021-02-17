@@ -34,16 +34,66 @@ namespace DocuDownload.Controllers
         }
 
         [HttpGet]
-        public IActionResult Connect(string docuwareURL = "http://localhost/docuware/platform", string login = "admin", string password = "admin")
+        public IActionResult Connect(string docuwareURL = "http://localhost/docuware/platform", 
+                                         string login = "admin", 
+                                         string password = "admin")
         {
             if (Functions.GetConnection(docuwareURL, login, password) == null)
                 return NotFound();
-            else
-                return Ok();
+            //save session ?
+            return Ok();
         }
 
         [HttpGet]
-        public IActionResult DownloadZip(string docuwareURI = "http://localhost/docuware/platform",
+        public IActionResult Organizations(string docuwareURI = "http://localhost/docuware/platform",
+                                         string login = "admin",
+                                         string password = "admin")
+        {
+            return Json(Functions.GetAllOrganizationNames(Functions.GetConnection(docuwareURI, login, password)));
+        }
+
+        [HttpGet]
+        public IActionResult FileCabinets(string docuwareURI = "http://localhost/docuware/platform",
+                                         string login = "admin",
+                                         string password = "admin",
+                                         string organization = null)
+        {
+            ServiceConnection conn = Functions.GetConnection(docuwareURI, login, password);
+            Organization org = Functions.GetOrganizationByName(conn, organization) ?? conn.Organizations[0];
+            return Json(Functions.GetAllFileCabinetNames(org));
+        }
+
+        [HttpGet]
+        public IActionResult Dialogs(string docuwareURI = "http://localhost/docuware/platform",
+                                         string login = "admin",
+                                         string password = "admin",
+                                         string organization = null,
+                                         string filecabinet = "Blandine company")
+        {
+            ServiceConnection conn = Functions.GetConnection(docuwareURI, login, password);
+            Organization org = Functions.GetOrganizationByName(conn, organization) ?? conn.Organizations[0];
+            FileCabinet fc = Functions.GetFileCabinetByName(org, filecabinet);
+            return Json(Functions.GetAllDialogNames(fc));
+        }
+
+        [HttpGet]
+        public IActionResult Fields(string docuwareURI = "http://localhost/docuware/platform",
+                                         string login = "admin",
+                                         string password = "admin",
+                                         string organization = null,
+                                         string filecabinet = "Blandine company",
+                                         string dialog = "ZipDownload"
+                                         )
+        {
+            ServiceConnection conn = Functions.GetConnection(docuwareURI, login, password);
+            Organization org = Functions.GetOrganizationByName(conn, organization) ?? conn.Organizations[0];
+            FileCabinet fc = Functions.GetFileCabinetByName(org, filecabinet);
+            Dialog dia = Functions.GetDialogByName(fc, dialog);
+            return Json(Functions.GetVisiblesFieldsInfos(dia));
+        }
+
+        [HttpGet]
+        public IActionResult DownloadZip(string docuwareURL = "http://localhost/docuware/platform",         //fonction de test de téléchargement
                                          string login = "admin",
                                          string password = "admin",
                                          string fcName = "Blandine company",
@@ -51,7 +101,7 @@ namespace DocuDownload.Controllers
         {
             string zipName = fcName + " - " + DateTimeOffset.Now.Date.ToString("dd.MM.yyyy") + " - Downloaded by " + login + ".zip";
 
-            Uri uri = new Uri(docuwareURI);
+            Uri uri = new Uri(docuwareURL);
             ServiceConnection conn = ServiceConnection.Create(uri, login, password);
 
             Organization org = conn.Organizations[0];
@@ -100,6 +150,7 @@ namespace DocuDownload.Controllers
         [HttpPost]
         public IActionResult SaveExtraction([FromBody] Extraction extraction)
         {
+            extraction.UserPassword = null;
             string directory = @"..\DocuDownload\Extractions\" + extraction.UserLogin + @"\";
             if (!System.IO.Directory.Exists(directory))
                 System.IO.Directory.CreateDirectory(directory);
@@ -109,9 +160,9 @@ namespace DocuDownload.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetExtraction(string user, string name)
+        public IActionResult GetExtraction(string user, string extractionName)
         {
-            string file = @"..\DocuDownload\Extractions\" + user + @"\" + name + ".json";
+            string file = @"..\DocuDownload\Extractions\" + user + @"\" + extractionName + ".json";
 
             if(System.IO.File.Exists(file))
             {
@@ -125,9 +176,9 @@ namespace DocuDownload.Controllers
         }
 
         [HttpDelete]
-        public IActionResult DeleteExtraction(string user, string name)
+        public IActionResult DeleteExtraction(string user, string extractionName)
         {
-            string file = @"..\DocuDownload\Extractions\" + user + @"\" + name + ".json";
+            string file = @"..\DocuDownload\Extractions\" + user + @"\" + extractionName + ".json";
 
             if (System.IO.File.Exists(file))
             {
