@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using DocuDownload.Models;
 using DocuWare.Platform.ServerClient;
 using Newtonsoft.Json;
+using System.IO;
+using System.Linq;
 
 namespace DocuDownload.Controllers
 {
@@ -82,8 +84,7 @@ namespace DocuDownload.Controllers
                                          string password = "admin",
                                          string organization = null,
                                          string filecabinet = "Blandine company",
-                                         string dialog = "ZipDownload"
-                                         )
+                                         string dialog = "ZipDownload")
         {
             ServiceConnection conn = Functions.GetConnection(docuwareURI, login, password);
             Organization org = Functions.GetOrganizationByName(conn, organization) ?? conn.Organizations[0];
@@ -152,11 +153,27 @@ namespace DocuDownload.Controllers
         {
             extraction.UserPassword = null;
             string directory = @"..\DocuDownload\Extractions\" + extraction.UserLogin + @"\";
-            if (!System.IO.Directory.Exists(directory))
-                System.IO.Directory.CreateDirectory(directory);
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
             System.IO.File.WriteAllText(directory + extraction.Name + ".json", JsonConvert.SerializeObject(extraction));
 
             return Ok();
+        }
+
+        [HttpGet]
+        public IActionResult GetUserExtractions(string user)
+        {
+            string directory = @"..\DocuDownload\Extractions\" + user + @"\";
+
+
+            if (Directory.Exists(directory))
+            {
+                return Json(Directory.GetFiles(directory).Select(p => Path.GetFileNameWithoutExtension(p)).ToList());
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         [HttpGet]
