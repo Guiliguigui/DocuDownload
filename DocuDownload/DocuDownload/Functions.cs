@@ -52,8 +52,6 @@ namespace DocuDownload
         public static Organization GetOrganizationByName(ServiceConnection connection, string orgName)
         {
             Organization organization = connection.Organizations.Where(i => i.Name == orgName).FirstOrDefault();
-            if (organization == null)
-                Console.WriteLine("Organization not found.");
             return organization;
         }
 
@@ -78,8 +76,6 @@ namespace DocuDownload
         {
             List<FileCabinet> fileCabinets = organization.GetFileCabinetsFromFilecabinetsRelation().FileCabinet;
             FileCabinet fileCabinet = fileCabinets.Where(i => i.Name == fileCabinetName).FirstOrDefault();
-            if (fileCabinet == null)
-                Console.WriteLine("File cabinet not found.");
             return fileCabinet;
         }
 
@@ -107,8 +103,6 @@ namespace DocuDownload
             foreach (var dia in dialogInfoItems.Dialog)
                 if (dia.GetDialogFromSelfRelation().DisplayName == dialogName)
                     dialog = dia.GetDialogFromSelfRelation();
-            if (dialog == null)
-                Console.WriteLine("Dialog not found.");
             return dialog;
         }
 

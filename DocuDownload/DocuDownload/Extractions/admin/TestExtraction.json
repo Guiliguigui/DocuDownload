@@ -7,7 +7,7 @@
     "FileCabinetName": "Blandine company",
     "DialogName": "ZipDownload",
     "Fields": {
-        "STOKE_PAR": "admin" 
+        "CHAPITRE": "doublechapitre"
     },
     "Hierarchy": [
         "CHAPITRE",

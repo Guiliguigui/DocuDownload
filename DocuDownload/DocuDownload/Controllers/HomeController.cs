@@ -36,14 +36,13 @@ namespace DocuDownload.Controllers
         }
 
         [HttpGet]
-        public IActionResult Connect(string docuwareURL = "http://localhost/docuware/platform", 
+        public IActionResult TryConnection(string docuwareURL = "http://localhost/docuware/platform", 
                                          string login = "admin", 
                                          string password = "admin")
         {
             if (Functions.GetConnection(docuwareURL, login, password) == null)
-                return NotFound();
-            //save session ?
-            return Ok();
+                return NotFound("Invalid credentials or URI.");
+            return Ok("Connection is valid.");
         }
 
         [HttpGet]
@@ -51,7 +50,10 @@ namespace DocuDownload.Controllers
                                          string login = "admin",
                                          string password = "admin")
         {
-            return Json(Functions.GetAllOrganizationNames(Functions.GetConnection(docuwareURI, login, password)));
+            ServiceConnection conn = Functions.GetConnection(docuwareURI, login, password);
+            if (conn == null) return NotFound("Invalid credentials or URI.");
+
+            return Json(Functions.GetAllOrganizationNames(conn));
         }
 
         [HttpGet]
@@ -61,7 +63,17 @@ namespace DocuDownload.Controllers
                                          string organization = null)
         {
             ServiceConnection conn = Functions.GetConnection(docuwareURI, login, password);
-            Organization org = Functions.GetOrganizationByName(conn, organization) ?? conn.Organizations[0];
+            if (conn == null) return NotFound("Invalid credentials or URI.");
+
+            Organization org;
+            if(organization != null)
+            {
+                org = Functions.GetOrganizationByName(conn, organization);
+                if (org == null) return NotFound("Organization not found.");
+            }
+            else
+                org = conn.Organizations[0];
+
             return Json(Functions.GetAllFileCabinetNames(org));
         }
 
@@ -73,8 +85,20 @@ namespace DocuDownload.Controllers
                                          string filecabinet = "Blandine company")
         {
             ServiceConnection conn = Functions.GetConnection(docuwareURI, login, password);
-            Organization org = Functions.GetOrganizationByName(conn, organization) ?? conn.Organizations[0];
+            if (conn == null) return NotFound("Invalid credentials or URI.");
+
+            Organization org;
+            if (organization != null)
+            {
+                org = Functions.GetOrganizationByName(conn, organization);
+                if (org == null) return NotFound("Organization not found.");
+            }
+            else
+                org = conn.Organizations[0];
+
             FileCabinet fc = Functions.GetFileCabinetByName(org, filecabinet);
+            if (fc == null) return NotFound("FileCabinet not found.");
+
             return Json(Functions.GetAllDialogNames(fc));
         }
 
@@ -87,9 +111,23 @@ namespace DocuDownload.Controllers
                                          string dialog = "ZipDownload")
         {
             ServiceConnection conn = Functions.GetConnection(docuwareURI, login, password);
-            Organization org = Functions.GetOrganizationByName(conn, organization) ?? conn.Organizations[0];
+            if (conn == null) return NotFound("Invalid credentials or URI.");
+
+            Organization org;
+            if (organization != null)
+            {
+                org = Functions.GetOrganizationByName(conn, organization);
+                if (org == null) return NotFound("Organization not found.");
+            }
+            else
+                org = conn.Organizations[0];
+
             FileCabinet fc = Functions.GetFileCabinetByName(org, filecabinet);
+            if (fc == null) return NotFound("FileCabinet not found.");
+
             Dialog dia = Functions.GetDialogByName(fc, dialog);
+            if (dia == null) return NotFound("Dialog not found.");
+
             return Json(Functions.GetVisiblesFieldsInfos(dia));
         }
 
@@ -130,18 +168,35 @@ namespace DocuDownload.Controllers
         {
             string zipName = extraction.FileCabinetName + " - " + DateTimeOffset.Now.Date.ToString("dd.MM.yyyy") + " - Downloaded by " + extraction.UserLogin + ".zip";
 
-            Uri uri = new Uri(extraction.DocuwareURI);
-            ServiceConnection conn = ServiceConnection.Create(uri, extraction.UserLogin, extraction.UserPassword);
+            ServiceConnection conn = Functions.GetConnection(extraction.DocuwareURI, extraction.UserLogin, extraction.UserPassword);
+            if (conn == null) return NotFound("Invalid credentials or URI.");
 
-            Organization org = Functions.GetOrganizationByName(conn, extraction.Organization) ?? conn.Organizations[0];
+            Organization org;
+            if (extraction.Organization != null)
+            {
+                org = Functions.GetOrganizationByName(conn, extraction.Organization);
+                if (org == null) return NotFound("Organization not found.");
+            }
+            else
+                org = conn.Organizations[0];
 
-            FileCabinet fileCabinet = Functions.GetFileCabinetByName(org, extraction.FileCabinetName);
+            FileCabinet fc = Functions.GetFileCabinetByName(org, extraction.FileCabinetName);
+            if (fc == null) return NotFound("FileCabinet not found.");
 
-            Dialog dialog = Functions.GetDialogByName(fileCabinet, extraction.DialogName);
+            Dialog dia = Functions.GetDialogByName(fc, extraction.DialogName);
+            if (dia == null) return NotFound("Dialog not found.");
 
-            List<Document> documents = Functions.SearchDocuments(dialog, extraction.Fields);
+            List<string> fieldsNames = Functions.GetVisiblesFieldsInfos(dia).Select(p => p.Key).ToList();
+            List<string> exFieldsNames = extraction.Fields.Select(p => p.Key).ToList();
+            List<string> differences= exFieldsNames.Where(m => !fieldsNames.Contains(m)).ToList();
+            if(differences.Count > 0)
+            {
+                return NotFound("Field(s) not matching : \n" + String.Join("\n", differences));
+            }
+            
+            List<Document> documents = Functions.SearchDocuments(dia, extraction.Fields);
             if (documents.Count == 0)
-                return NotFound();
+                return NotFound("There is none documents that match this research.");
 
             var zipStream = Functions.GetZipStream(documents, extraction.Hierarchy);
 
@@ -157,7 +212,7 @@ namespace DocuDownload.Controllers
                 Directory.CreateDirectory(directory);
             System.IO.File.WriteAllText(directory + extraction.Name + ".json", JsonConvert.SerializeObject(extraction));
 
-            return Ok();
+            return Ok("Extraction saved.");
         }
 
         [HttpGet]
@@ -172,7 +227,7 @@ namespace DocuDownload.Controllers
             }
             else
             {
-                return NotFound();
+                return NotFound("Extraction not Found.");
             }
         }
 
@@ -188,7 +243,7 @@ namespace DocuDownload.Controllers
             }
             else
             {
-                return NotFound();
+                return NotFound("Extraction not Found.");
             }
         }
 
@@ -205,11 +260,11 @@ namespace DocuDownload.Controllers
                 if (System.IO.Directory.GetFiles(directory).Length == 0)
                     System.IO.Directory.Delete(directory);
 
-                return Ok();
+                return Ok("Extraction deleted.");
             }
             else
             {
-                return NotFound();
+                return NotFound("Extraction not Found.");
             }
         }
     }
