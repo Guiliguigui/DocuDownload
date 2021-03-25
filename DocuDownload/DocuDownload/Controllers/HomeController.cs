@@ -29,6 +29,11 @@ namespace DocuDownload.Controllers
             return View();
         }
 
+        public IActionResult Extraction()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -166,6 +171,9 @@ namespace DocuDownload.Controllers
         [HttpGet]
         public IActionResult DownloadZipExtraction([FromBody] Extraction extraction)
         {
+            if (!ModelState.IsValid)
+                return BadRequest("Extraction Format Invalid");
+
             string zipName = extraction.FileCabinetName + " - " + DateTimeOffset.Now.Date.ToString("dd.MM.yyyy") + " - Downloaded by " + extraction.UserLogin + ".zip";
 
             ServiceConnection conn = Functions.GetConnection(extraction.DocuwareURI, extraction.UserLogin, extraction.UserPassword);
@@ -196,7 +204,7 @@ namespace DocuDownload.Controllers
             
             List<Document> documents = Functions.SearchDocuments(dia, extraction.Fields);
             if (documents.Count == 0)
-                return NotFound("There is none documents that match this research.");
+                return NotFound("There is no documents that match this search.");
 
             var zipStream = Functions.GetZipStream(documents, extraction.Hierarchy);
 
