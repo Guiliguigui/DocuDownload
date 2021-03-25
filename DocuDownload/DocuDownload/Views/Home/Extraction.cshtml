@@ -1,0 +1,150 @@
+﻿
+@{
+    ViewData["Title"] = "Extraction";
+}
+
+<h2>Extraction</h2>
+
+<script src="~/js/extraction.js"></script>
+
+<div>
+    <form method="post" class="container">
+        <div class="mb-3 row">
+            <label class="col-md-4 control-label">URL Plateforme DocuWare :</label>
+            <div class="col-md-6">
+                <input type="url" class="form-control" placeholder="http://www.exemple.com/docuware/platform" />
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-md-4 control-label">Login DocuWare :</label>
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Login" />
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-md-4 control-label">Mot de Passe :</label>
+            <div class="col-md-6">
+                <input type="password" class="form-control" placeholder="Password" />
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-md-4 control-label">Extraction :</label>
+            <div class="col-md-6">
+                <select class="form-control form-select">
+                    <option selected>Nouvelle extraction</option>
+                    <option value="ext1">Extraction 1</option>
+                </select>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-md-4 control-label">Nom de l'extraction :</label>
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Nom" />
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-md-4 control-label">Organisation :</label>
+            <div class="col-md-6">
+                <select class="form-control form-select">
+                    <option selected>Mon organisation</option>
+                </select>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-md-4 control-label">Armoire :</label>
+            <div class="col-md-6">
+                <select class="form-control form-select">
+                    <option selected>Choisir l'armoire</option>
+                </select>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label class="col-md-4 control-label">Boite de recherche :</label>
+            <div class="col-md-6">
+                <select class="form-control form-select">
+                    <option selected>Choisir la boite</option>
+                </select>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-md-10">
+                <table class="table table-hover" id="fieldList">
+                    <thead>
+                        <tr> <th scope="col">Arborescence</th> <th scope="col">Champs</th> <th scope="col">Valeurs</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr id="1">
+                            <td><span class="control-label"><input type="checkbox" class="form-check-input" name="CHAPITRE" checked />   1</span></td>
+                            <td class="control-label">Chapitre</td>
+                            <td class="">
+                                <input type="text" />
+                            </td>
+                        </tr>
+                        <tr id="2">
+                            <td><span class="control-label"><input type="checkbox" class="form-check-input" name="SOUS_CHAPITRE" checked />   2</span></td>
+                            <td class="control-label">Sous-Chapitre</td>
+                            <td class="">
+                                <input type="text" />
+                            </td>
+                        </tr>
+                        <tr id="3">
+                            <td><span class="control-label"><input type="checkbox" class="form-check-input" name="TYPE_DOCUMENT" />   </span></td>
+                            <td class="control-label">Type de Document</td>
+                            <td class="">
+                                <input type="text" />
+                            </td>
+                        </tr>
+                        <tr id="3">
+                            <td><span class="control-label"><input type="checkbox" class="form-check-input" name="TYPE_DOCUMENT" />   </span></td>
+                            <td class="control-label">Type de Document</td>
+                            <td class="">
+                                <input type="text" />
+                            </td>
+                        </tr>
+                        <tr id="3">
+                            <td><span class="control-label"><input type="checkbox" class="form-check-input" name="TYPE_DOCUMENT" />   </span></td>
+                            <td class="control-label">Type de Document</td>
+                            <td class="">
+                                <input type="text" />
+                            </td>
+                        </tr>
+                        <tr id="3">
+                            <td><span class="control-label"><input type="checkbox" class="form-check-input" name="TYPE_DOCUMENT" />   </span></td>
+                            <td class="control-label">Type de Document</td>
+                            <td class="">
+                                <input type="text" />
+                            </td>
+                        </tr>
+                        <tr id="3">
+                            <td><span class="control-label"><input type="checkbox" class="form-check-input" name="TYPE_DOCUMENT" />   </span></td>
+                            <td class="control-label">Type de Document</td>
+                            <td class="">
+                                <input type="text" />
+                            </td>
+                        </tr>
+                        <tr id="3">
+                            <td><span class="control-label"><input type="checkbox" class="form-check-input" name="TYPE_DOCUMENT" />   </span></td>
+                            <td class="control-label">Type de Document</td>
+                            <td class="">
+                                <input type="text" />
+                            </td>
+                        </tr>
+                        <tr id="3">
+                            <td><span class="control-label"><input type="checkbox" class="form-check-input" name="TYPE_DOCUMENT" />   </span></td>
+                            <td class="control-label">Type de Document</td>
+                            <td class="">
+                                <input type="text" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <input asp-controller="Home" asp-action="SaveExtraction" class="btn btn-primary col-3" type="submit" value="Enregistrer l'extraction" />
+            <input asp-controller="Home" asp-action="DownloadZipExtraction" class="btn btn-primary col-3" type="submit" value="Télécharger l'archive" />
+        </div>
+    </form>
+</div>
+
+
