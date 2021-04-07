@@ -5,65 +5,44 @@
 
 <h2>Extraction</h2>
 
+<script src="~/lib/jquery/dist/jquery.js"></script> @*retirer à la fin du dev*@
 <script src="~/js/extraction.js"></script>
 
-<div>
-    <form method="post" class="container">
-        <div class="mb-3 row">
-            <label class="col-md-4 control-label">URL Plateforme DocuWare :</label>
+<div class="container">
+    @using (Html.BeginForm())
+    {
+        <partial name="~/Views/Home/LoginPartial.cshtml" />
+        <div class="mb-3 row" id="selectExtraction">
+            <label class="col-md-3 control-label">Extraction :</label>
             <div class="col-md-6">
-                <input type="url" class="form-control" placeholder="http://www.exemple.com/docuware/platform" />
-            </div>
-        </div>
-        <div class="mb-3 row">
-            <label class="col-md-4 control-label">Login DocuWare :</label>
-            <div class="col-md-6">
-                <input type="text" class="form-control" placeholder="Login" />
-            </div>
-        </div>
-        <div class="mb-3 row">
-            <label class="col-md-4 control-label">Mot de Passe :</label>
-            <div class="col-md-6">
-                <input type="password" class="form-control" placeholder="Password" />
-            </div>
-        </div>
-        <div class="mb-3 row">
-            <label class="col-md-4 control-label">Extraction :</label>
-            <div class="col-md-6">
-                <select class="form-control form-select">
-                    <option selected>Nouvelle extraction</option>
-                    <option value="ext1">Extraction 1</option>
+                <select class="form-control form-select" onChange="javascript:onChangeExtraction();">
+                    <option value="newExtraction" selected>Nouvelle extraction</option>
                 </select>
             </div>
         </div>
-        <div class="mb-3 row">
-            <label class="col-md-4 control-label">Nom de l'extraction :</label>
+        <div class="mb-3 row" id="nameExtraction">
+            <label class="col-md-3 control-label">Nom de l'extraction :</label>
             <div class="col-md-6">
-                <input type="text" class="form-control" placeholder="Nom" />
+                <input name="name" type="text" class="form-control" placeholder="Nom" />
+            </div>
+            <label class="col-md-3 invalid-feedback">Veuillez saisir un nom pour la nouvelle extraction</label>
+        </div>
+        <div class="mb-3 row" id="selectOrganization">
+            <label class="col-md-3 control-label">Organisation :</label>
+            <div class="col-md-6">
+                <select class="form-control form-select" name="organization" onChange="javascript:updateFileCabinets(); javascript:updateDialogs();"></select>
             </div>
         </div>
-        <div class="mb-3 row">
-            <label class="col-md-4 control-label">Organisation :</label>
+        <div class="mb-3 row" id="selectFleCabinet">
+            <label class="col-md-3 control-label">Armoire :</label>
             <div class="col-md-6">
-                <select class="form-control form-select">
-                    <option selected>Mon organisation</option>
-                </select>
+                <select class="form-control form-select" name="fileCabinet" onChange="javascript:updateDialogs();"></select>
             </div>
         </div>
-        <div class="mb-3 row">
-            <label class="col-md-4 control-label">Armoire :</label>
+        <div class="mb-3 row" id="selectDialog">
+            <label class="col-md-3 control-label">Boite de recherche :</label>
             <div class="col-md-6">
-                <select class="form-control form-select">
-                    <option selected>Choisir l'armoire</option>
-                </select>
-            </div>
-        </div>
-        <div class="mb-3 row">
-            <label class="col-md-4 control-label">Boite de recherche :</label>
-            <div class="col-md-6">
-                <select class="form-control form-select">
-                    <option selected>Choisir la boite</option>
-                </select>
+                <select class="form-control form-select" name="dialog" onChange=""></select>
             </div>
         </div>
         <div class="mb-3 row">
@@ -140,11 +119,12 @@
                 </table>
             </div>
         </div>
-        <div class="mb-3 row">
-            <input asp-controller="Home" asp-action="SaveExtraction" class="btn btn-primary col-3" type="submit" value="Enregistrer l'extraction" />
-            <input asp-controller="Home" asp-action="DownloadZipExtraction" class="btn btn-primary col-3" type="submit" value="Télécharger l'archive" />
+        <div class="mb-3 row justify-content-center">
+            <input type="button" value="Enregistrer l'extraction" formaction="SaveExtraction" formmethod="post" class="btn btn-primary col-md-6" />
+            <input type="button" value="Télécharger l'archive" formaction="DownloadZipExtraction" formmethod="post" class="btn btn-primary col-md-6" />
         </div>
-    </form>
+    }
+
 </div>
 
 

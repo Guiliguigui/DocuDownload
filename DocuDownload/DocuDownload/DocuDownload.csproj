@@ -6,14 +6,18 @@
 
   <ItemGroup>
     <PackageReference Include="DocuWarePlatformApi" Version="7.3.55728" />
+    <PackageReference Include="jquery" Version="3.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.9" />
+    <PackageReference Include="popper.js" Version="1.16.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Extractions\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>

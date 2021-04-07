@@ -1,0 +1,45 @@
+﻿@using Microsoft.AspNetCore.Http
+<div class="connexionDiv">
+    <div class="mb-3 row" id="docuwareURI">
+        <label class="col-md-3 control-label">URL Plateforme DocuWare :</label>
+        <div class="col-md-6">
+            <input type="url" class="form-control" id="inputDocuwareURI" placeholder="http://www.exemple.com/docuware/platform" name="docuwareURI" />
+        </div>
+        <label class="col-md-3 invalid-feedback">URL non Valide</label>
+    </div>
+    <div class="mb-3 row" id="userLogin">
+        <label class="col-md-3 control-label">Login DocuWare :</label>
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="inputUserLogin" placeholder="Login" name="userLogin" />
+        </div>
+    </div>
+    <div class="mb-3 row" id="userPassword">
+        <label class="col-md-3 control-label">Mot de Passe :</label>
+        <div class="col-md-6">
+            <input type="password" class="form-control" id="inputUserPassword" placeholder="Mot de Passe" name="userPassword" />
+        </div>
+    </div>
+    <div class="mb-3 row" id="connectionFeedBack">
+        <button class="btn btn-primary col-md-3" type="button" onclick="checkConnexion()">Connection</button>
+        @if (@Context.Session.GetString("isConnected") == "true")
+        {
+            <label class="col-md-6 valid-feedback">Vous êtes connecté !</label>
+        }
+        else
+        {
+            <label class="col-md-6 invalid-feedback">Identifiants de connexion incorrects!</label>
+        }
+    </div>
+    <script>
+        function checkConnexion() {
+            $.post("@Url.Action("LoginPartial", "Home")",
+                {
+                    docuwareURI: $('#inputDocuwareURI').val(),
+                    userLogin: $('#inputUserLogin').val(),
+                    userPassword: $('#inputUserPassword').val()
+                }).done(function (data) {
+                    $('#connexionDiv').html(data);
+                });
+        }
+    </script>
+</div>

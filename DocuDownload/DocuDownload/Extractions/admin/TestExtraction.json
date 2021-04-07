@@ -3,7 +3,7 @@
     "DocuwareURI": "http://localhost/docuware/platform",
     "UserLogin": "admin",
     "UserPassword": null,
-    "Organization": null,
+    "Organization": "Peters Engineering",
     "FileCabinetName": "Blandine company",
     "DialogName": "ZipDownload",
     "Fields": {

@@ -12,8 +12,8 @@ namespace DocuDownload
                           string userLogin, 
                           string userPassword, 
                           string organization, 
-                          string fileCabinetName, 
-                          string dialogName, 
+                          string fileCabinet, 
+                          string dialog, 
                           List<string> hierarchy, 
                           Dictionary<string, string> fields)
         {
@@ -22,8 +22,8 @@ namespace DocuDownload
             UserLogin = userLogin;
             UserPassword = userPassword;
             Organization = organization;
-            FileCabinetName = fileCabinetName;
-            DialogName = dialogName;
+            FileCabinet = fileCabinet;
+            Dialog = dialog;
             Hierarchy = hierarchy;
             Fields = fields;
         }
@@ -37,8 +37,8 @@ namespace DocuDownload
         public string UserLogin { get; set; }
         public string UserPassword { get; set; }
         public string Organization { get; set; }
-        public string FileCabinetName { get; set; }
-        public string DialogName { get; set; }
+        public string FileCabinet { get; set; }
+        public string Dialog { get; set; }
         public List<string> Hierarchy { get; set; }
         public Dictionary<string, string> Fields { get; set; }
     }
