@@ -7,6 +7,7 @@ using DocuWare.Services.Http;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace DocuDownload
 {
@@ -30,6 +31,50 @@ namespace DocuDownload
             {
                 return null;
             }
+        }
+
+        /// <summary> 
+        /// Récupère toutes les informations docuware correspondant aux identifiants.
+        /// </summary> 
+        /// <param name="docuwareURL">URL de la plateforme Docuware</param> 
+        /// <param name="login">Identifiant de l'utilisateur</param> 
+        /// <param name="password">Mot de passe de l'utilisateur</param> 
+        /// <returns>Structure de données</returns>
+        public static Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, string[]>>>> GetDocuWareInfos(string docuwareURL, string login, string password)
+        {
+            ServiceConnection connection;
+
+            try
+            {
+                Uri uri = new Uri(docuwareURL);
+                connection = ServiceConnection.Create(uri, login, password);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            var dwInfos = new Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, string[]>>>>();
+            foreach (var organization in connection.Organizations)
+            {
+                var fileCabinets = new Dictionary<string, Dictionary<string, Dictionary<string, string[]>>>();
+                foreach (var fileCabinet in organization.GetFileCabinetsFromFilecabinetsRelation().FileCabinet)
+                {
+                    if (!fileCabinet.IsBasket)
+                    {
+                        var dialogs = new Dictionary<string, Dictionary<string, string[]>>();
+                        foreach (var dialog in fileCabinet.GetDialogInfosFromSearchesRelation().Dialog.Select(p => p.GetDialogFromSelfRelation()).ToList())
+                        {
+                            Dictionary<string, string[]> fields = GetVisiblesFieldsInfos(dialog);
+                            dialogs.Add(dialog.DisplayName, fields);
+                        }
+                        fileCabinets.Add(fileCabinet.Name, dialogs);
+                    }
+                }
+                dwInfos.Add(organization.Name, fileCabinets);
+            }
+
+            return dwInfos;
         }
 
         /// <summary> 
@@ -116,7 +161,7 @@ namespace DocuDownload
             Dictionary<string, string[]> fieldsNames = new Dictionary<string, string[]>();
             foreach (var field in dialog.Fields)
             {
-                if (field.Visible)
+                if (field.Visible && field.DBFieldName != "DocuWareFulltext")
                 {
                     fieldsNames.Add(field.DBFieldName.ToString(), new string [2] { field.DlgLabel.ToString(), field.DWFieldType.ToString()});
                 }
