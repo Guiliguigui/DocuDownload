@@ -1,9 +1,9 @@
 ﻿var docuwareInfos;
 
 $(document).ready(function () {
-    //$('.invalid-feedback, .valid-feedback').each(function () {
-    //    $(this).hide();
-    //})
+    $('.text-success, .text-danger').each(function () {
+        $(this).hide();
+    })
 
     $("#selectExtraction select").focus(function () { //changer événement déclencheur pour verif connexion pour debug la liste
         $.getJSON('GetUserExtractions',
