@@ -1,0 +1,121 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Newtonsoft.Json;
+
+<script src="~/lib/jquery/dist/jquery.js"></script> @*retirer à la fin du dev*@
+<script>
+    var dwInfos = {};
+    $.post(
+        "@Url.Action("DocuWareInfos", "Home")",
+        {
+            docuwareURI: '@Context.Session.GetString("docuwareURI")',
+            userLogin: '@Context.Session.GetString("userLogin")',
+            userPassword:'@Context.Session.GetString("userPassword")'
+        },
+        function (data) {
+            dwInfos = data;
+        }
+    );
+
+    function test() {
+        console.log(dwInfos);
+    }
+    //$(function () {
+    //    var temp = {};
+
+    //    $.each(items, function () {
+    //        $("<option />")
+    //            .attr("value", this.value)
+    //            .html(this.name)
+    //            .appendTo("#organization");
+    //        temp[this.value] = this.subitems;
+    //    });
+
+    //    $("#organization").change(function () {
+    //        var value = $(this).val();
+    //        var menu = $("#fileCabinet");
+
+    //        menu.empty();
+    //        $.each(temp[value], function () {
+    //            $("<option />")
+    //                .attr("value", this.value)
+    //                .html(this.name)
+    //                .appendTo(menu);
+    //        });
+    //    }).change();
+    //});
+
+    //$(document).ready(function () {
+
+    //});
+</script>
+<button onclick="test()"></button>
+<div class="mb-3 row" id="selectExtraction">
+    <label class="col-md-3 control-label">Extraction :</label>
+    <div class="col-md-6">
+        <select class="form-control form-select" id="selectExtraction">
+            <option value="newExtraction" selected>Nouvelle extraction</option>
+        </select>
+    </div>
+</div>
+<div class="mb-3 row" id="nameExtraction">
+    <label class="col-md-3 control-label">Nom de l'extraction :</label>
+    <div class="col-md-6">
+        <input id="nameExtraction" type="text" class="form-control" placeholder="Nom" />
+    </div>
+    <label class="col-md-3 text-danger">Veuillez saisir un nom pour la nouvelle extraction</label>
+</div>
+<div class="mb-3 row" id="selectOrganization">
+    <label class="col-md-3 control-label">Organisation :</label>
+    <div class="col-md-6">
+        <select class="form-control form-select" id="organization"></select>
+    </div>
+</div>
+<div class="mb-3 row" id="selectFleCabinet">
+    <label class="col-md-3 control-label">Armoire :</label>
+    <div class="col-md-6">
+        <select class="form-control form-select" id="fileCabinet"></select>
+    </div>
+</div>
+<div class="mb-3 row" id="selectDialog">
+    <label class="col-md-3 control-label">Boite de recherche :</label>
+    <div class="col-md-6">
+        <select class="form-control form-select" id="dialog"></select>
+    </div>
+</div>
+<div class="mb-3 row">
+    <div class="col-md-10">
+        <table class="table table-hover" id="fieldList">
+            <thead>
+                <tr> <th scope="col"></th><th scope="col">Arborescence</th> <th scope="col">Champs</th> <th scope="col">Valeurs</th></tr>
+            </thead>
+            <tbody>
+                <tr id="1">
+                    <td><span class="control-label"><input type="checkbox" class="form-check-input" name="CHAPITRE" checked />   1</span></td>
+                    <td class="control-label">Chapitre</td>
+                    <td class="">
+                        <input type="text" />
+                    </td>
+                </tr>
+                <tr id="2">
+                    <td><span class="control-label"><input type="checkbox" class="form-check-input" name="SOUS_CHAPITRE" checked />   2</span></td>
+                    <td class="control-label">Sous-Chapitre</td>
+                    <td class="">
+                        <input type="text" />
+                    </td>
+                </tr>
+                <tr id="3">
+                    <td><span class="control-label"><input type="checkbox" class="form-check-input" name="TYPE_DOCUMENT" />   </span></td>
+                    <td class="control-label">Type de Document</td>
+                    <td class="">
+                        <input type="text" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="mb-3 row justify-content-center">
+    <input type="button" value="Enregistrer l'extraction" onclick="" class="btn btn-primary col-md-6" />
+    <input type="button" value="Télécharger l'archive" onclick="" class="btn btn-primary col-md-6" />
+</div>
+

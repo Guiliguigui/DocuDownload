@@ -1,5 +1,7 @@
-﻿@using Microsoft.AspNetCore.Http
-<div class="connexionDiv">
+﻿@if (@Context.Session.GetString("isConnected") == "true")
+{<!--Connected-->}
+@using Microsoft.AspNetCore.Http
+<div id="connectionDiv">
     <div class="mb-3 row" id="docuwareURI">
         <label class="col-md-3 control-label">URL Plateforme DocuWare :</label>
         <div class="col-md-6">
@@ -20,25 +22,35 @@
         </div>
     </div>
     <div class="mb-3 row" id="connectionFeedBack">
-        <button class="btn btn-primary col-md-3" type="button" onclick="checkConnexion()">Connection</button>
+        <button class="btn btn-primary col-md-3" type="button" onclick="checkconnection()">Connexion</button>
         @if (@Context.Session.GetString("isConnected") == "true")
         {
-            <label class="col-md-6 text-success">Vous êtes connecté !</label>
+            <label id="labelFeedBack" class="col-md-6 text-success">Vous êtes connecté !</label>
         }
         else
         {
-            <label class="col-md-6 text-danger">Identifiants de connexion incorrects !</label>
+            <label id="labelFeedBack" class="col-md-6 text-danger">Identifiants de connection incorrects !</label>
         }
     </div>
     <script>
-        function checkConnexion() {
-            $.post("@Url.Action("LoginPartial", "Home")",
+        function checkconnection() {
+            $.post("@Url.Action("_LoginPartial", "Home")",
                 {
                     docuwareURI: $('#inputDocuwareURI').val(),
                     userLogin: $('#inputUserLogin').val(),
                     userPassword: $('#inputUserPassword').val()
                 },function (data) {
-                    $('#connexionDiv').html(data);
+                    $('#connectionDiv').html(data);
+                    if (data.startsWith("<!--Connected-->")) {
+                        $.post("@Url.Action("_FormPartial", "Home")",
+                            function (data) {
+                                $('#formDiv').html(data);
+                            }
+                        );
+                    }
+                    else {
+                        $('#formDiv').html("");
+                    }
                 });
         }
     </script>

@@ -42,7 +42,7 @@ namespace DocuDownload.Controllers
         }
 
         [HttpPost]
-        public IActionResult LoginPartial(string docuwareURI, string userLogin, string userPassword)
+        public IActionResult _LoginPartial(string docuwareURI, string userLogin, string userPassword)
         {
             if (Functions.GetConnection(docuwareURI, userLogin, userPassword) != null)
             {
@@ -52,9 +52,31 @@ namespace DocuDownload.Controllers
                 HttpContext.Session.SetString("userPassword", userPassword);
             }
             else
+            {
                 HttpContext.Session.SetString("isConnected", "false");
+                HttpContext.Session.SetString("docuwareURI", "");
+                HttpContext.Session.SetString("userLogin", "");
+                HttpContext.Session.SetString("userPassword", "");
+            }
 
-            return PartialView("LoginPartial");
+            return PartialView("_LoginPartial");
+        }
+
+        [HttpPost]
+        public IActionResult _FormPartial()
+        {
+            //var dwData = Functions.GetDocuWareInfos(HttpContext.Session.GetString("docuwareURI"), HttpContext.Session.GetString("userLogin"), HttpContext.Session.GetString("userPassword"));
+            //if (HttpContext.Session.GetString("isConnected") == "true")
+            //{
+            //string dwData = JsonConvert.SerializeObject(Functions.GetDocuWareInfos(HttpContext.Session.GetString("docuwareURI"), HttpContext.Session.GetString("userLogin"), HttpContext.Session.GetString("userPassword")));
+            //HttpContext.Session.SetString("dwInfos", dwData);
+            //}
+            //else
+            //{
+            //    HttpContext.Session.SetString("dwInfos", "");
+            //}
+
+            return PartialView("_FormPartial"); //, dwData);
         }
 
         //[HttpGet]
@@ -68,16 +90,10 @@ namespace DocuDownload.Controllers
         //}
 
         [HttpPost]
-        public IActionResult DocuWareInfos(string docuwareURI = "http://localhost/docuware/platform",
-                                         string userLogin = "admin",
-                                         string userPassword = "admin")
+        public IActionResult DocuWareInfos(string docuwareURI, string userLogin, string userPassword)
         {
-            ServiceConnection conn = Functions.GetConnection(docuwareURI, userLogin, userPassword);
-            if (conn == null) return NotFound("Invalid credentials or URI.");
-
-            Dictionary<string, Dictionary<string, Dictionary<string, string>>> docuwareInfos = new Dictionary<string, Dictionary<string, Dictionary<string, string>>>();
-
-            Functions.GetAllOrganizationNames(conn);
+            var docuwareInfos = Functions.GetDocuWareInfos(docuwareURI, userLogin, userPassword);
+            if (docuwareInfos == null) return Ok("Invalid credentials or URI.");
 
             return Json(docuwareInfos);
         }
