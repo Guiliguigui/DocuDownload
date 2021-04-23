@@ -1,54 +1,66 @@
 ﻿@using Microsoft.AspNetCore.Http
-@using Newtonsoft.Json;
 
 <script src="~/lib/jquery/dist/jquery.js"></script> @*retirer à la fin du dev*@
 <script>
     var dwInfos = {};
-    $.post(
-        "@Url.Action("DocuWareInfos", "Home")",
-        {
-            docuwareURI: '@Context.Session.GetString("docuwareURI")',
-            userLogin: '@Context.Session.GetString("userLogin")',
-            userPassword:'@Context.Session.GetString("userPassword")'
-        },
-        function (data) {
-            dwInfos = data;
-        }
-    );
+    
+    $(document).ready(function () {
+        $.post(
+            "@Url.Action("DocuWareInfos", "Home")",
+            {
+                docuwareURI: '@Context.Session.GetString("docuwareURI")',
+                userLogin: '@Context.Session.GetString("userLogin")',
+                userPassword:'@Context.Session.GetString("userPassword")'
+            },
+            function (data) {
+                dwInfos = data;
+                $.each(dwInfos, function (org, fcs) {
+                    $("<option />")
+                        .attr("value", org)
+                        .html(org)
+                        .appendTo("#organization");
+                });
+                $("#organization").change(updateFromOrganization).change();
+                $("#fileCabinet").change(updateFromFileCabinet);
+                $("#dialog").change(updateFromDialog);
+            }
+        );
+    });
 
-    function test() {
-        console.log(dwInfos);
+    function updateFromOrganization() {
+        var org = $("#organization").val();
+        var lstFileCabinet = $("#fileCabinet");
+
+        lstFileCabinet.empty();
+        $.each(dwInfos[org], function (fc, ds) {
+            $("<option />")
+                .attr("value", fc)
+                .html(fc)
+                .appendTo(lstFileCabinet);
+        });
+        updateFromFileCabinet();
     }
-    //$(function () {
-    //    var temp = {};
 
-    //    $.each(items, function () {
-    //        $("<option />")
-    //            .attr("value", this.value)
-    //            .html(this.name)
-    //            .appendTo("#organization");
-    //        temp[this.value] = this.subitems;
-    //    });
+    function updateFromFileCabinet() {
+        var org = $("#organization").val();
+        var fc = $("#fileCabinet").val();
+        var lstDialog = $("#dialog");
 
-    //    $("#organization").change(function () {
-    //        var value = $(this).val();
-    //        var menu = $("#fileCabinet");
+        lstDialog.empty();
+        $.each(dwInfos[org][fc], function (d, fs) {
+            $("<option />")
+                .attr("value", d)
+                .html(d)
+                .appendTo(lstDialog);
+        });
+        updateFromDialog();
+    }
 
-    //        menu.empty();
-    //        $.each(temp[value], function () {
-    //            $("<option />")
-    //                .attr("value", this.value)
-    //                .html(this.name)
-    //                .appendTo(menu);
-    //        });
-    //    }).change();
-    //});
+    function updateFromDialog() {
 
-    //$(document).ready(function () {
-
-    //});
+    }
+    
 </script>
-<button onclick="test()"></button>
 <div class="mb-3 row" id="selectExtraction">
     <label class="col-md-3 control-label">Extraction :</label>
     <div class="col-md-6">
@@ -88,7 +100,7 @@
             <thead>
                 <tr> <th scope="col"></th><th scope="col">Arborescence</th> <th scope="col">Champs</th> <th scope="col">Valeurs</th></tr>
             </thead>
-            <tbody>
+            @*<tbody>
                 <tr id="1">
                     <td><span class="control-label"><input type="checkbox" class="form-check-input" name="CHAPITRE" checked />   1</span></td>
                     <td class="control-label">Chapitre</td>
@@ -110,7 +122,7 @@
                         <input type="text" />
                     </td>
                 </tr>
-            </tbody>
+            </tbody>*@
         </table>
     </div>
 </div>
