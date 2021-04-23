@@ -65,29 +65,11 @@ namespace DocuDownload.Controllers
         [HttpPost]
         public IActionResult _FormPartial()
         {
-            //var dwData = Functions.GetDocuWareInfos(HttpContext.Session.GetString("docuwareURI"), HttpContext.Session.GetString("userLogin"), HttpContext.Session.GetString("userPassword"));
-            //if (HttpContext.Session.GetString("isConnected") == "true")
-            //{
-            //string dwData = JsonConvert.SerializeObject(Functions.GetDocuWareInfos(HttpContext.Session.GetString("docuwareURI"), HttpContext.Session.GetString("userLogin"), HttpContext.Session.GetString("userPassword")));
-            //HttpContext.Session.SetString("dwInfos", dwData);
-            //}
-            //else
-            //{
-            //    HttpContext.Session.SetString("dwInfos", "");
-            //}
-
-            return PartialView("_FormPartial"); //, dwData);
+            if (HttpContext.Session.GetString("isConnected") == "true")
+                return PartialView("_FormPartial");
+            else
+                return Ok("User not connected");
         }
-
-        //[HttpGet]
-        //public IActionResult TryConnection(string  docuwareURI = "http://localhost/docuware/platform", 
-        //                                 string userLogin = "admin", 
-        //                                 string userPassword = "admin")
-        //{
-        //    if (Functions.GetConnection( docuwareURI, userLogin, userPassword) == null)
-        //        return NotFound("Invalid credentials or URI.");
-        //    return Ok("Connection is valid.");
-        //}
 
         [HttpPost]
         public IActionResult DocuWareInfos(string docuwareURI, string userLogin, string userPassword)
@@ -96,92 +78,6 @@ namespace DocuDownload.Controllers
             if (docuwareInfos == null) return Ok("Invalid credentials or URI.");
 
             return Json(docuwareInfos);
-        }
-
-        [HttpGet]
-        public IActionResult Organizations(string docuwareURI = "http://localhost/docuware/platform",
-                                         string userLogin = "admin",
-                                         string userPassword = "admin")
-        {
-            ServiceConnection conn = Functions.GetConnection(docuwareURI, userLogin, userPassword);
-            if (conn == null) return NotFound("Invalid credentials or URI.");
-
-            return Json(Functions.GetAllOrganizationNames(conn));
-        }
-
-        [HttpGet]
-        public IActionResult FileCabinets(string docuwareURI = "http://localhost/docuware/platform",
-                                         string userLogin = "admin",
-                                         string userPassword = "admin",
-                                         string organization = null)
-        {
-            ServiceConnection conn = Functions.GetConnection(docuwareURI, userLogin, userPassword);
-            if (conn == null) return NotFound("Invalid credentials or URI.");
-
-            Organization org;
-            if(organization != null)
-            {
-                org = Functions.GetOrganizationByName(conn, organization);
-                if (org == null) return NotFound("organization not found.");
-            }
-            else
-                org = conn.Organizations[0];
-
-            return Json(Functions.GetAllFileCabinetNames(org));
-        }
-
-        [HttpGet]
-        public IActionResult Dialogs(string docuwareURI = "http://localhost/docuware/platform",
-                                         string userLogin = "admin",
-                                         string userPassword = "admin",
-                                         string organization = null,
-                                         string fileCabinet = "Blandine company")
-        {
-            ServiceConnection conn = Functions.GetConnection(docuwareURI, userLogin, userPassword);
-            if (conn == null) return NotFound("Invalid credentials or URI.");
-
-            Organization org;
-            if (organization != null)
-            {
-                org = Functions.GetOrganizationByName(conn, organization);
-                if (org == null) return NotFound("organization not found.");
-            }
-            else
-                org = conn.Organizations[0];
-
-            FileCabinet fc = Functions.GetFileCabinetByName(org, fileCabinet);
-            if (fc == null) return NotFound("FileCabinet not found.");
-
-            return Json(Functions.GetAllDialogNames(fc));
-        }
-
-        [HttpGet]
-        public IActionResult Fields(string docuwareURI = "http://localhost/docuware/platform",
-                                         string userLogin = "admin",
-                                         string userPassword = "admin",
-                                         string organization = null,
-                                         string fileCabinet = "Blandine company",
-                                         string dialog = "ZipDownload")
-        {
-            ServiceConnection conn = Functions.GetConnection(docuwareURI, userLogin, userPassword);
-            if (conn == null) return NotFound("Invalid credentials or URI.");
-
-            Organization org;
-            if (organization != null)
-            {
-                org = Functions.GetOrganizationByName(conn, organization);
-                if (org == null) return NotFound("organization not found.");
-            }
-            else
-                org = conn.Organizations[0];
-
-            FileCabinet fc = Functions.GetFileCabinetByName(org, fileCabinet);
-            if (fc == null) return NotFound("fileCabinet not found.");
-
-            Dialog dia = Functions.GetDialogByName(fc, dialog);
-            if (dia == null) return NotFound("dialog not found.");
-
-            return Json(Functions.GetVisiblesFieldsInfos(dia));
         }
 
         [HttpGet]
@@ -216,8 +112,8 @@ namespace DocuDownload.Controllers
             return File(zipStream, "application/octet-stream", zipName);
         }
 
-        [HttpGet]
-        public IActionResult DownloadZipExtraction([FromForm] Extraction extraction)
+        [HttpPost]
+        public IActionResult DownloadZipExtraction(Extraction extraction)
         {
             if (!ModelState.IsValid)
                 return BadRequest("Extraction Format Invalid");
@@ -247,7 +143,7 @@ namespace DocuDownload.Controllers
             List<string> differences= exFieldsNames.Where(m => !fieldsNames.Contains(m)).ToList();
             if(differences.Count > 0)
             {
-                return NotFound("Field(s) not matching : \n" + String.Join("\n", differences));
+                return NotFound("Field(s) not matching : \n" + string.Join("\n", differences));
             }
             
             List<Document> documents = Functions.SearchDocuments(dia, extraction.Fields);
@@ -260,7 +156,7 @@ namespace DocuDownload.Controllers
         }
 
         [HttpPost]
-        public IActionResult SaveExtraction([FromForm] Extraction extraction)
+        public IActionResult SaveExtraction(Extraction extraction)
         {
             extraction.UserPassword = null;
             string directory = @"..\DocuDownload\Extractions\" + extraction.UserLogin + @"\";
@@ -271,7 +167,7 @@ namespace DocuDownload.Controllers
             return Ok("Extraction saved.");
         }
 
-        [HttpGet]
+        [HttpPost]
         public IActionResult GetUserExtractions(string userLogin)
         {
             string directory = @"..\DocuDownload\Extractions\" + userLogin + @"\";
@@ -287,7 +183,7 @@ namespace DocuDownload.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost]
         public IActionResult GetExtraction(string userLogin, string Name)
         {
             string file = @"..\DocuDownload\Extractions\" + userLogin + @"\" + Name + ".json";
@@ -312,9 +208,9 @@ namespace DocuDownload.Controllers
             {
                 System.IO.File.Delete(file);
 
-                string directory = System.IO.Path.GetDirectoryName(file);
-                if (System.IO.Directory.GetFiles(directory).Length == 0)
-                    System.IO.Directory.Delete(directory);
+                string directory = Path.GetDirectoryName(file);
+                if (Directory.GetFiles(directory).Length == 0)
+                    Directory.Delete(directory);
 
                 return Ok("Extraction deleted.");
             }
