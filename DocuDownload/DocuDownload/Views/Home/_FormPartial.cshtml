@@ -20,11 +20,37 @@
                         .html(org)
                         .appendTo("#organization");
                 });
+
                 $("#organization").change(updateFromOrganization).change();
                 $("#fileCabinet").change(updateFromFileCabinet);
                 $("#dialog").change(updateFromDialog);
+
+                $.post('GetUserExtractions',
+                    { userLogin: '@Context.Session.GetString("userLogin")' },
+                    function (data) {
+                        //$.each($(`#selectExtraction option`), function () {
+                        //    if (this.value != "newExtraction") {this.remove()}
+                        //})
+                        $.each(data, function (key, value) {
+                            $("<option />")
+                                .attr("value", value)
+                                .html(value)
+                                .appendTo("#extraction");
+                            $("#extraction").change(updateFromExtraction);
+                        });
+                    }
+                );
             }
         );
+        $("#nameExtraction").blur(function () {
+            pattern = /([a-zA-Z0-9\s_\\.\-\(\):])+/i;
+            if (pattern.test($('#nameExtraction').val())) {
+                $('#nameFeedBack').hide();
+            }
+            else {
+                $('#nameFeedBack').show();
+            }
+        });
     });
 
     function updateFromOrganization() {
@@ -57,38 +83,46 @@
     }
 
     function updateFromDialog() {
+        var org = $("#organization").val();
+        var fc = $("#fileCabinet").val();
+        var dia = $("#dialog").val();
+        var fieldTable = $("#fieldTable");
+        console.log(dwInfos[org][fc][dia]);
+    }
+
+    function updateFromExtraction() {
 
     }
     
 </script>
-<div class="mb-3 row" id="selectExtraction">
+<div class="mb-3 row">
     <label class="col-md-3 control-label">Extraction :</label>
     <div class="col-md-6">
-        <select class="form-control form-select" id="selectExtraction">
+        <select class="form-control form-select" id="extraction">
             <option value="newExtraction" selected>Nouvelle extraction</option>
         </select>
     </div>
 </div>
-<div class="mb-3 row" id="nameExtraction">
+<div class="mb-3 row">
     <label class="col-md-3 control-label">Nom de l'extraction :</label>
     <div class="col-md-6">
         <input id="nameExtraction" type="text" class="form-control" placeholder="Nom" />
     </div>
-    <label class="col-md-3 text-danger">Veuillez saisir un nom pour la nouvelle extraction</label>
+    <label class="col-md-3 text-danger" id="nameFeedBack">Veuillez saisir un nom valide pour la nouvelle extraction</label>
 </div>
-<div class="mb-3 row" id="selectOrganization">
+<div class="mb-3 row">
     <label class="col-md-3 control-label">Organisation :</label>
     <div class="col-md-6">
         <select class="form-control form-select" id="organization"></select>
     </div>
 </div>
-<div class="mb-3 row" id="selectFleCabinet">
+<div class="mb-3 row">
     <label class="col-md-3 control-label">Armoire :</label>
     <div class="col-md-6">
         <select class="form-control form-select" id="fileCabinet"></select>
     </div>
 </div>
-<div class="mb-3 row" id="selectDialog">
+<div class="mb-3 row">
     <label class="col-md-3 control-label">Boite de recherche :</label>
     <div class="col-md-6">
         <select class="form-control form-select" id="dialog"></select>
@@ -96,12 +130,12 @@
 </div>
 <div class="mb-3 row">
     <div class="col-md-10">
-        <table class="table table-hover" id="fieldList">
+        <table class="table table-hover" id="fieldTable">
             <thead>
                 <tr> <th scope="col"></th><th scope="col">Arborescence</th> <th scope="col">Champs</th> <th scope="col">Valeurs</th></tr>
             </thead>
-            @*<tbody>
-                <tr id="1">
+            <tbody>
+                @*<tr id="1">
                     <td><span class="control-label"><input type="checkbox" class="form-check-input" name="CHAPITRE" checked />   1</span></td>
                     <td class="control-label">Chapitre</td>
                     <td class="">
@@ -121,8 +155,8 @@
                     <td class="">
                         <input type="text" />
                     </td>
-                </tr>
-            </tbody>*@
+                </tr>*@
+            </tbody>
         </table>
     </div>
 </div>
