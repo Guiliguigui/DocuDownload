@@ -1,12 +1,13 @@
 ﻿@using Microsoft.AspNetCore.Http
 
 <script src="~/lib/jquery/dist/jquery.js"></script> @*retirer à la fin du dev*@
+<script src="https://unpkg.com/feather-icons"></script>
 <script>
     var dwInfos = {};
     
     $(document).ready(function () {
         $.post(
-            "@Url.Action("DocuWareInfos", "Home")",
+            "DocuWareInfos",
             {
                 docuwareURI: '@Context.Session.GetString("docuwareURI")',
                 userLogin: '@Context.Session.GetString("userLogin")',
@@ -25,7 +26,10 @@
                 $("#fileCabinet").change(updateFromFileCabinet);
                 $("#dialog").change(updateFromDialog);
 
-                $.post('GetUserExtractions',
+                
+            }
+        );
+        $.post('GetUserExtractions',
                     { userLogin: '@Context.Session.GetString("userLogin")' },
                     function (data) {
                         //$.each($(`#selectExtraction option`), function () {
@@ -34,16 +38,14 @@
                         $.each(data, function (key, value) {
                             $("<option />")
                                 .attr("value", value)
-                                .html(value)
+                                .html(value)// + `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>"`)
                                 .appendTo("#extraction");
                             $("#extraction").change(updateFromExtraction);
                         });
                     }
                 );
-            }
-        );
         $("#nameExtraction").blur(function () {
-            pattern = /([a-zA-Z0-9\s_\\.\-\(\):])+/i;
+            pattern = /([a-zA-Z0-9\s_\\.\-\(\):])+/i; // /([^\/]+)(?=\.\w+$)/
             if (pattern.test($('#nameExtraction').val())) {
                 $('#nameFeedBack').hide();
             }
@@ -86,16 +88,32 @@
         var org = $("#organization").val();
         var fc = $("#fileCabinet").val();
         var dia = $("#dialog").val();
-        var fieldTable = $("#fieldTable");
+        var tempFields = $("#tempFields");
         console.log(dwInfos[org][fc][dia]);
+
+        tempFields.empty();
+        $.each(dwInfos[org][fc][dia], function (f, infos) {
+            $("<option />")
+                .attr("value", infos[0])
+                .html(f)
+                .appendTo(tempFields);
+        });
     }
 
     function updateFromExtraction() {
 
     }
-    
+
+    function addNewField() {
+
+    }
+
+    function removeField() {
+
+    }
+
 </script>
-<div class="mb-3 row">
+<div class="mb-3 row justify-content-center">
     <label class="col-md-3 control-label">Extraction :</label>
     <div class="col-md-6">
         <select class="form-control form-select" id="extraction">
@@ -103,65 +121,103 @@
         </select>
     </div>
 </div>
-<div class="mb-3 row">
+<div class="mb-3 row justify-content-center">
     <label class="col-md-3 control-label">Nom de l'extraction :</label>
     <div class="col-md-6">
         <input id="nameExtraction" type="text" class="form-control" placeholder="Nom" />
     </div>
-    <label class="col-md-3 text-danger" id="nameFeedBack">Veuillez saisir un nom valide pour la nouvelle extraction</label>
+    @*<label class="col-md-3 text-danger" id="nameFeedBack">Veuillez saisir un nom valide pour la nouvelle extraction</label>*@
 </div>
-<div class="mb-3 row">
+<div class="mb-3 row justify-content-center">
     <label class="col-md-3 control-label">Organisation :</label>
     <div class="col-md-6">
         <select class="form-control form-select" id="organization"></select>
     </div>
 </div>
-<div class="mb-3 row">
+<div class="mb-3 row justify-content-center">
     <label class="col-md-3 control-label">Armoire :</label>
     <div class="col-md-6">
         <select class="form-control form-select" id="fileCabinet"></select>
     </div>
 </div>
-<div class="mb-3 row">
+<div class="mb-3 row justify-content-center">
     <label class="col-md-3 control-label">Boite de recherche :</label>
     <div class="col-md-6">
         <select class="form-control form-select" id="dialog"></select>
     </div>
 </div>
-<div class="mb-3 row">
-    <div class="col-md-10">
+<div class="mb-3 row justify-content-center">
+    <div class="col-md-9">
         <table class="table table-hover" id="fieldTable">
             <thead>
-                <tr> <th scope="col"></th><th scope="col">Arborescence</th> <th scope="col">Champs</th> <th scope="col">Valeurs</th></tr>
+                <tr><th scope="col"></th>  <th scope="col">Arborescence</th> <th scope="col">Champs</th> <th scope="col">Valeurs</th></tr>
             </thead>
             <tbody>
-                @*<tr id="1">
-                    <td><span class="control-label"><input type="checkbox" class="form-check-input" name="CHAPITRE" checked />   1</span></td>
-                    <td class="control-label">Chapitre</td>
+                <tr id="11">
+                    <td><button onclick="" class="btn btn-primary "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg></button></td>
+                    <td>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="customCheck1" checked="">
+                            <label class="custom-control-label" for="customCheck1">1</label>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="form-control form-select" id="tempFields">
+                            <option selected>Chapitre</option>
+                            <option>Type de Document</option>
+                        </select>
+                    </td>
                     <td class="">
-                        <input type="text" />
+                        <input type="text" class="form-control" />
                     </td>
                 </tr>
-                <tr id="2">
-                    <td><span class="control-label"><input type="checkbox" class="form-check-input" name="SOUS_CHAPITRE" checked />   2</span></td>
-                    <td class="control-label">Sous-Chapitre</td>
+                <tr id="12">
+                    <td>
+                        <button onclick="" class="btn btn-primary ">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                        </button>
+                    </td>
+                    <td>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="customCheck1" checked="">
+                            <label class="custom-control-label" for="customCheck1">2</label>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="form-control form-select" >
+                            <option selected>Sous-Chapitre</option>
+                            <option>Type de Document</option>
+                        </select>
+                    </td>
                     <td class="">
-                        <input type="text" />
+                        <input type="text" class="form-control" />
                     </td>
                 </tr>
-                <tr id="3">
-                    <td><span class="control-label"><input type="checkbox" class="form-check-input" name="TYPE_DOCUMENT" />   </span></td>
-                    <td class="control-label">Type de Document</td>
-                    <td class="">
-                        <input type="text" />
+                <tr id="13">
+                    <td>
+                        <button onclick="" class="btn btn-primary ">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                        </button>
                     </td>
-                </tr>*@
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
             </tbody>
         </table>
     </div>
 </div>
-<div class="mb-3 row justify-content-center">
-    <input type="button" value="Enregistrer l'extraction" onclick="" class="btn btn-primary col-md-6" />
-    <input type="button" value="Télécharger l'archive" onclick="" class="btn btn-primary col-md-6" />
+<div class="mb-3 row justify-content-center justify-content-center">
+    <div class="col-md-9">
+        <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" id="publicSwitch" checked="">
+            <label class="custom-control-label" for="publicSwitch">Rendre cette extraction publique (tout les utilisateur de DocuDownload la verront)</label>
+        </div>
+    </div>
+</div>
+<div class="mb-3 row justify-content-center justify-content-center">
+    <button onclick="" class="btn btn-primary "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Télécharger l'archive</button>
+    <p class="col-md-1"></p>
+    <button onclick="" class="btn btn-primary "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Enregistrer l'extraction</button>
 </div>
 

@@ -1,36 +1,39 @@
 ﻿@if (@Context.Session.GetString("isConnected") == "true")
 {<!--Connected-->}
 @using Microsoft.AspNetCore.Http
-<div id="connectionDiv">
-    <div class="mb-3 row" id="docuwareURI">
+    <div class="mb-3 row justify-content-center" id="docuwareURI">
         <label class="col-md-3 control-label">URL Plateforme DocuWare :</label>
         <div class="col-md-6">
             <input type="url" class="form-control" id="inputDocuwareURI" placeholder="http://www.exemple.com/docuware/platform" name="docuwareURI" />
         </div>
-        <label class="col-md-3 invalid-feedback">URL non Valide</label>
+        @*<label class="col-md-3 invalid-feedback">URL non Valide</label>*@
     </div>
-    <div class="mb-3 row" id="userLogin">
+    <div class="mb-3 row justify-content-center" id="userLogin">
         <label class="col-md-3 control-label">Login DocuWare :</label>
         <div class="col-md-6">
             <input type="text" class="form-control" id="inputUserLogin" placeholder="Login" name="userLogin" />
         </div>
     </div>
-    <div class="mb-3 row" id="userPassword">
+    <div class="mb-3 row justify-content-center" id="userPassword">
         <label class="col-md-3 control-label">Mot de Passe :</label>
         <div class="col-md-6">
             <input type="password" class="form-control" id="inputUserPassword" placeholder="Mot de Passe" name="userPassword" />
         </div>
     </div>
-    <div class="mb-3 row" id="connectionFeedBack">
-        <button class="btn btn-primary col-md-3" type="button" onclick="checkconnection()">Connexion</button>
-        @if (@Context.Session.GetString("isConnected") == "true")
-        {
-            <label id="labelFeedBack" class="col-md-6 text-success">Vous êtes connecté !</label>
-        }
-        else
-        {
-            <label id="labelFeedBack" class="col-md-6 text-danger">Identifiants de connection incorrects !</label>
-        }
+    <div class="mb-3 row justify-content-center" id="connectionFeedBack">
+        <div class="col-md-1">
+            <button class="btn btn-primary" type="button" onclick="checkconnection()">Connexion</button>
+        </div>
+        <div class="align-middle col-md-8">
+            @if (@Context.Session.GetString("isConnected") == "true")
+            {
+                <p id="labelFeedBack" class="text-success">Vous êtes connecté !</p>
+            }
+            else
+            {
+                <p id="labelFeedBack" class="text-danger">Identifiants de connection incorrects !</p>
+            }
+        </div>
     </div>
     <script>
         function checkconnection() {
@@ -54,4 +57,3 @@
                 });
         }
     </script>
-</div>
