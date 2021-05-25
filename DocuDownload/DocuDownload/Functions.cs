@@ -25,7 +25,9 @@ namespace DocuDownload
             try
             {
                 Uri uri = new Uri(docuwareURL);
-                return ServiceConnection.Create(uri, login, password);
+                ServiceConnection connection = ServiceConnection.Create(uri, login, password);
+                var test = connection.Organizations; //en cas de problème avec le serveur d'authentification
+                return connection;
             }
             catch (Exception)
             {
@@ -42,17 +44,9 @@ namespace DocuDownload
         /// <returns>Structure de données</returns>
         public static Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, string[]>>>> GetDocuWareInfos(string docuwareURL, string login, string password)
         {
-            ServiceConnection connection;
-
-            try
-            {
-                Uri uri = new Uri(docuwareURL);
-                connection = ServiceConnection.Create(uri, login, password);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            ServiceConnection connection = GetConnection(docuwareURL, login, password);
+            if (connection == null)
+                 return null;
 
             var dwInfos = new Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, string[]>>>>();
             foreach (var organization in connection.Organizations)

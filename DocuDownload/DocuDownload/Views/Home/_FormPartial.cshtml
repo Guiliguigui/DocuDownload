@@ -1,13 +1,11 @@
 ﻿@using Microsoft.AspNetCore.Http
 
 <script src="~/lib/jquery/dist/jquery.js"></script> @*retirer à la fin du dev*@
-<script src="https://unpkg.com/feather-icons"></script>
 <script>
     var dwInfos = {};
-    
+
     $(document).ready(function () {
-        $.post(
-            "DocuWareInfos",
+        $.post("DocuWareInfos",
             {
                 docuwareURI: '@Context.Session.GetString("docuwareURI")',
                 userLogin: '@Context.Session.GetString("userLogin")',
@@ -26,27 +24,27 @@
                 $("#fileCabinet").change(updateFromFileCabinet);
                 $("#dialog").change(updateFromDialog);
 
-                
+
             }
         );
         $.post('GetUserExtractions',
-                    { userLogin: '@Context.Session.GetString("userLogin")' },
-                    function (data) {
-                        //$.each($(`#selectExtraction option`), function () {
-                        //    if (this.value != "newExtraction") {this.remove()}
-                        //})
-                        $.each(data, function (key, value) {
-                            $("<option />")
-                                .attr("value", value)
-                                .html(value)// + `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>"`)
-                                .appendTo("#extraction");
-                            $("#extraction").change(updateFromExtraction);
-                        });
-                    }
-                );
-        $("#nameExtraction").blur(function () {
-            pattern = /([a-zA-Z0-9\s_\\.\-\(\):])+/i; // /([^\/]+)(?=\.\w+$)/
-            if (pattern.test($('#nameExtraction').val())) {
+            { userLogin: '@Context.Session.GetString("userLogin")' },
+            function (data) {
+                //$.each($(`#selectExtraction option`), function () {
+                //    if (this.value != "newExtraction") {this.remove()}
+                //})
+                $.each(data, function (key, value) {
+                    $("<option />")
+                        .attr("value", value)
+                        .html(value)// + `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>"`)
+                        .appendTo("#extraction");
+                    $("#extraction").change(updateFromExtraction);
+                });
+            }
+        );
+
+        $("#nameExtraction").change(function () {
+            if (isValid($('#nameExtraction').val())) {
                 $('#nameFeedBack').hide();
             }
             else {
@@ -54,6 +52,15 @@
             }
         });
     });
+
+    var isValid = (function () {
+        var rg1 = /^[^\\/:\*\?"<>\|]+$/; // forbidden characters \ / : * ? " < > |
+        var rg2 = /^\./; // cannot start with dot (.)
+        var rg3 = /^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
+        return function isValid(fname) {
+            return rg1.test(fname) && !rg2.test(fname) && !rg3.test(fname);
+        }
+    })();
 
     function updateFromOrganization() {
         var org = $("#organization").val();
@@ -148,18 +155,21 @@
 </div>
 <div class="mb-3 row justify-content-center">
     <div class="col-md-9">
-        <table class="table table-hover" id="fieldTable">
+        <table class="table table-hover table-bordered" id="fieldList">
             <thead>
-                <tr><th scope="col"></th>  <th scope="col">Arborescence</th> <th scope="col">Champs</th> <th scope="col">Valeurs</th></tr>
+                <tr><th scope="col"></th>  <th scope="col" colspan="2">Arborescence</th> <th scope="col">Champs</th> <th scope="col">Valeurs</th></tr>
             </thead>
             <tbody>
-                <tr id="11">
-                    <td><button onclick="" class="btn btn-primary "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg></button></td>
+                <tr id="1">
+                    <td><a onclick="removeField()" role="button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></td>
                     <td>
                         <div class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" id="customCheck1" checked="">
-                            <label class="custom-control-label" for="customCheck1">1</label>
+                            <label class="custom-control-label" for="customCheck1">Position: </label>
                         </div>
+                    </td>
+                    <td>
+                        <input class="form-control" type="number" min="0">
                     </td>
                     <td>
                         <select class="form-control form-select" id="tempFields">
@@ -167,41 +177,42 @@
                             <option>Type de Document</option>
                         </select>
                     </td>
-                    <td class="">
+                    <td>
                         <input type="text" class="form-control" />
                     </td>
                 </tr>
-                <tr id="12">
+                <tr id="2">
                     <td>
-                        <button onclick="" class="btn btn-primary ">
+                        <a onclick="removeField()" role="button">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-                        </button>
+                        </a>
                     </td>
                     <td>
                         <div class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" id="customCheck1" checked="">
-                            <label class="custom-control-label" for="customCheck1">2</label>
+                            <label class="custom-control-label" for="customCheck1">Position: </label>
                         </div>
                     </td>
                     <td>
-                        <select class="form-control form-select" >
+                        <input class="form-control" type="number" min="0">
+                    </td>
+                    <td>
+                        <select class="form-control form-select">
                             <option selected>Sous-Chapitre</option>
                             <option>Type de Document</option>
                         </select>
                     </td>
-                    <td class="">
+                    <td>
                         <input type="text" class="form-control" />
                     </td>
                 </tr>
-                <tr id="13">
+                <tr id="3">
                     <td>
-                        <button onclick="" class="btn btn-primary ">
+                        <a onclick="addNewField()" role="button">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-                        </button>
+                        </a>
                     </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td colspan="4"></td>
                 </tr>
             </tbody>
         </table>
@@ -215,7 +226,7 @@
         </div>
     </div>
 </div>
-<div class="mb-3 row justify-content-center justify-content-center">
+<div class="mb-3 row justify-content-center">
     <button onclick="" class="btn btn-primary "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Télécharger l'archive</button>
     <p class="col-md-1"></p>
     <button onclick="" class="btn btn-primary "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Enregistrer l'extraction</button>
