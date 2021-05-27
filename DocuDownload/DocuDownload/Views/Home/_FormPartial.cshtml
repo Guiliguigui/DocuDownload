@@ -3,6 +3,7 @@
 <script src="~/lib/jquery/dist/jquery.js"></script> @*retirer à la fin du dev*@
 <script>
     var dwInfos = {};
+    var remainingDwFieldsList = {};
 
     $(document).ready(function () {
         $.post("DocuWareInfos",
@@ -92,30 +93,87 @@
     }
 
     function updateFromDialog() {
-        var org = $("#organization").val();
-        var fc = $("#fileCabinet").val();
-        var dia = $("#dialog").val();
-        var tempFields = $("#tempFields");
-        console.log(dwInfos[org][fc][dia]);
-
-        tempFields.empty();
-        $.each(dwInfos[org][fc][dia], function (f, infos) {
-            $("<option />")
-                .attr("value", infos[0])
-                .html(f)
-                .appendTo(tempFields);
+        var maxLines = Object.keys(dwInfos[$("#organization").val()][$("#fileCabinet").val()][$("#dialog").val()]).length;
+        while ($('tr').length > maxLines+1) {
+            $('tr')[maxLines].remove();
+        }
+        $('tr select[id*=selectFields]').each(function () {
+            updateDwFields(`#`+this.id);
         });
     }
 
-    function updateFromExtraction() {
+    function updateDwFields(select = "#selectFields1") {
+        var org = $("#organization").val();
+        var fc = $("#fileCabinet").val();
+        var dia = $("#dialog").val();
+        var selectFields = $(select);
+        selectFields.empty();
+        $.each(dwInfos[org][fc][dia], function (f, infos) {
+            $("<option />")
+                .attr("value", f)
+                .html(infos[0])
+                .appendTo(selectFields);
+        });
 
+        //selectFields.focus(onFocusField(selectFields));
+        //selectFields.change(onChangeField(selectFields));
     }
 
     function addNewField() {
+        if ($('tr').length > Object.keys(dwInfos[$("#organization").val()][$("#fileCabinet").val()][$("#dialog").val()]).length) {
+            alert("Vous avez suffisament de ligne pour rechercher sur tout les champs de la boite de recherche !");
+            return;
+        }
+        
+        var rowNumber = $('#lastRow').prev().length ? parseInt($('#lastRow').prev().attr('id'))+1 : 1;
+        
+        var newRow = $(`
+            <tr id="${rowNumber}">
+                <td><a id="removeButton${rowNumber}" role="button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></td>
+                <td>
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="check${rowNumber}">
+                        <label class="custom-control-label" for="check${rowNumber}">Position: </label>
+                    </div>
+                </td>
+                <td>
+                    <input class="form-control" type="number" min="0" id="hierarchyNumber${rowNumber}" disabled>
+                </td>
+                <td>
+                    <select class="form-control form-select" id="selectFields${rowNumber}">
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="form-control" id="value${rowNumber}"/>
+                </td>
+            </tr>
+        `);
+        newRow.insertBefore($('#lastRow'));
+        updateDwFields(`#selectFields${rowNumber}`);
+        
+        $(`#removeButton${rowNumber}`).click(function () { newRow.remove(); });
+        //$(`#check${rowNumber}`).change(function () {
+        //    if (.prop(":checked")) {
+        //        $(`#hierarchyNumber${rowNumber}`).prop('disabled', false);
+        //    } else {
+        //        $(`#hierarchyNumber${rowNumber}`).prop('disabled', true);
+        //    }
+        //});
+        //$(`#hierarchyNumber${rowNumber}`).change(function () {
+        //    alert("test");
+        //});
 
     }
 
-    function removeField() {
+    //function removeField(button) {
+    //    button.css("color", "red");
+    //}
+
+    function checkHierachy() {
+
+    }
+
+    function updateFromExtraction() {
 
     }
 
@@ -133,7 +191,7 @@
     <div class="col-md-6">
         <input id="nameExtraction" type="text" class="form-control" placeholder="Nom" />
     </div>
-    @*<label class="col-md-3 text-danger" id="nameFeedBack">Veuillez saisir un nom valide pour la nouvelle extraction</label>*@
+    @*<label class="col-md-3 text-danger" id="nameFeedBack">Veuillez saisir un nom valide pour la nouvelle extraction</label> Trouver le bon input*@
 </div>
 <div class="mb-3 row justify-content-center">
     <label class="col-md-3 control-label">Organisation :</label>
@@ -160,53 +218,7 @@
                 <tr><th scope="col"></th>  <th scope="col" colspan="2">Arborescence</th> <th scope="col">Champs</th> <th scope="col">Valeurs</th></tr>
             </thead>
             <tbody>
-                <tr id="1">
-                    <td><a onclick="removeField()" role="button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></td>
-                    <td>
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="customCheck1" checked="">
-                            <label class="custom-control-label" for="customCheck1">Position: </label>
-                        </div>
-                    </td>
-                    <td>
-                        <input class="form-control" type="number" min="0">
-                    </td>
-                    <td>
-                        <select class="form-control form-select" id="tempFields">
-                            <option selected>Chapitre</option>
-                            <option>Type de Document</option>
-                        </select>
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" />
-                    </td>
-                </tr>
-                <tr id="2">
-                    <td>
-                        <a onclick="removeField()" role="button">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-                        </a>
-                    </td>
-                    <td>
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="customCheck1" checked="">
-                            <label class="custom-control-label" for="customCheck1">Position: </label>
-                        </div>
-                    </td>
-                    <td>
-                        <input class="form-control" type="number" min="0">
-                    </td>
-                    <td>
-                        <select class="form-control form-select">
-                            <option selected>Sous-Chapitre</option>
-                            <option>Type de Document</option>
-                        </select>
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" />
-                    </td>
-                </tr>
-                <tr id="3">
+                <tr id="lastRow">
                     <td>
                         <a onclick="addNewField()" role="button">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
@@ -221,7 +233,7 @@
 <div class="mb-3 row justify-content-center justify-content-center">
     <div class="col-md-9">
         <div class="custom-control custom-switch">
-            <input type="checkbox" class="custom-control-input" id="publicSwitch" checked="">
+            <input type="checkbox" class="custom-control-input" id="publicSwitch">
             <label class="custom-control-label" for="publicSwitch">Rendre cette extraction publique (tout les utilisateur de DocuDownload la verront)</label>
         </div>
     </div>

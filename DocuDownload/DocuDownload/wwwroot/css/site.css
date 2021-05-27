@@ -44,3 +44,14 @@ body {
 input[type="number"] {
     width: 60px;
 }
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #ced4da;
+    background: #325d88;
+    color: #fff;
+}
+
+.table-bordered td, .table-bordered th {
+    border: 1px solid #ced4da;
+}
