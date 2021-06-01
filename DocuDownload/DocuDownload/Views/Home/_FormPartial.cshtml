@@ -4,6 +4,16 @@
 <script>
     var dwInfos = {};
     var remainingDwFieldsList = {};
+    var dwTypeMatch = {
+        "Text": "text",
+        "Keyword": "text",
+        "Numeric": "number",
+        "Memo": "text",
+        "Decimal": "number",
+        "Date": "date",
+        "DateTime": "date",
+        "Table": "text"
+    };
 
     $(document).ready(function () {
         $.post("DocuWareInfos",
@@ -24,8 +34,8 @@
                 $("#organization").change(updateFromOrganization).change();
                 $("#fileCabinet").change(updateFromFileCabinet);
                 $("#dialog").change(updateFromDialog);
-
-
+                
+                console.log(dwInfos);
             }
         );
         $.post('GetUserExtractions',
@@ -102,7 +112,7 @@
         });
     }
 
-    function updateDwFields(select = "#selectFields1") {
+    function updateDwFields(select) {
         var org = $("#organization").val();
         var fc = $("#fileCabinet").val();
         var dia = $("#dialog").val();
@@ -116,7 +126,19 @@
         });
 
         //selectFields.focus(onFocusField(selectFields));
-        //selectFields.change(onChangeField(selectFields));
+        console.log(selectFields.parent().parent().attr('id'));
+        selectFields.unbind('change');
+        selectFields.change(function () { onChangeField(selectFields.parent().parent().attr('id')) }).change(); //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<dfkyguidfgviudgiufgvidfyvg
+        //.attr("type", dwTypeMatch[infos[1]])
+    }
+
+    function onChangeField(rowNumber){
+        var org = $("#organization").val();
+        var fc = $("#fileCabinet").val();
+        var dia = $("#dialog").val();
+        console.log($(`#selectFields${rowNumber}`).val());
+        console.log(dwTypeMatch[dwInfos[org][fc][dia][$(`#selectFields${rowNumber}`).val()][1]]);
+        $(`#value${rowNumber}`).attr("type", dwTypeMatch[dwInfos[org][fc][dia][$(`#selectFields${rowNumber}`).val()][1]])
     }
 
     function addNewField() {
@@ -132,12 +154,12 @@
                 <td><a id="removeButton${rowNumber}" role="button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></td>
                 <td>
                     <div class="custom-control custom-checkbox">
-                        <input type="checkbox" class="custom-control-input" id="check${rowNumber}">
+                        <input type="checkbox" class="custom-control-input " id="check${rowNumber}">
                         <label class="custom-control-label" for="check${rowNumber}">Position: </label>
                     </div>
                 </td>
                 <td>
-                    <input class="form-control" type="number" min="0" id="hierarchyNumber${rowNumber}" disabled>
+                    <input class="form-control" type="number" min="0" id="hierarchyNumber${rowNumber}" style="width: 60px;" disabled>
                 </td>
                 <td>
                     <select class="form-control form-select" id="selectFields${rowNumber}">
@@ -149,9 +171,9 @@
             </tr>
         `);
         newRow.insertBefore($('#lastRow'));
+        $(`#removeButton${rowNumber}`).click(function () { newRow.remove(); });
         updateDwFields(`#selectFields${rowNumber}`);
         
-        $(`#removeButton${rowNumber}`).click(function () { newRow.remove(); });
         //$(`#check${rowNumber}`).change(function () {
         //    if (.prop(":checked")) {
         //        $(`#hierarchyNumber${rowNumber}`).prop('disabled', false);
@@ -179,7 +201,7 @@
 
 </script>
 <div class="mb-3 row justify-content-center">
-    <label class="col-md-3 control-label">Extraction :</label>
+    <label class="col-md-3 col-form-label">Extraction :</label>
     <div class="col-md-6">
         <select class="form-control form-select" id="extraction">
             <option value="newExtraction" selected>Nouvelle extraction</option>
@@ -187,26 +209,26 @@
     </div>
 </div>
 <div class="mb-3 row justify-content-center">
-    <label class="col-md-3 control-label">Nom de l'extraction :</label>
+    <label class="col-md-3 col-form-label">Nom de l'extraction :</label>
     <div class="col-md-6">
         <input id="nameExtraction" type="text" class="form-control" placeholder="Nom" />
     </div>
     @*<label class="col-md-3 text-danger" id="nameFeedBack">Veuillez saisir un nom valide pour la nouvelle extraction</label> Trouver le bon input*@
 </div>
 <div class="mb-3 row justify-content-center">
-    <label class="col-md-3 control-label">Organisation :</label>
+    <label class="col-md-3 col-form-label">Organisation :</label>
     <div class="col-md-6">
         <select class="form-control form-select" id="organization"></select>
     </div>
 </div>
 <div class="mb-3 row justify-content-center">
-    <label class="col-md-3 control-label">Armoire :</label>
+    <label class="col-md-3 col-form-label">Armoire :</label>
     <div class="col-md-6">
         <select class="form-control form-select" id="fileCabinet"></select>
     </div>
 </div>
 <div class="mb-3 row justify-content-center">
-    <label class="col-md-3 control-label">Boite de recherche :</label>
+    <label class="col-md-3 col-form-label">Boite de recherche :</label>
     <div class="col-md-6">
         <select class="form-control form-select" id="dialog"></select>
     </div>
@@ -239,8 +261,8 @@
     </div>
 </div>
 <div class="mb-3 row justify-content-center">
-    <button onclick="" class="btn btn-primary "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Télécharger l'archive</button>
+    <button class="btn btn-primary "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Télécharger l'archive</button>
     <p class="col-md-1"></p>
-    <button onclick="" class="btn btn-primary "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Enregistrer l'extraction</button>
+    <button class="btn btn-primary "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Enregistrer l'extraction</button>
 </div>
 

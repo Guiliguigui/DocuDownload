@@ -41,12 +41,12 @@ body {
     text-align: center;
 }
 
-input[type="number"] {
-    width: 60px;
+.row {
+    vertical-align: central;
 }
 
 .table thead th {
-    vertical-align: bottom;
+    vertical-align: middle;
     border-bottom: 2px solid #ced4da;
     background: #325d88;
     color: #fff;
@@ -54,4 +54,9 @@ input[type="number"] {
 
 .table-bordered td, .table-bordered th {
     border: 1px solid #ced4da;
+}
+
+.table > tbody > tr > td:nth-child(1), .table > tbody > tr > th:nth-child(1) {
+    width: 60px;
+    height: 60px;
 }
