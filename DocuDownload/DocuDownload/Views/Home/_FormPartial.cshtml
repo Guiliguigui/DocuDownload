@@ -7,11 +7,11 @@
     var dwTypeMatch = {
         "Text": "text",
         "Keyword": "text",
-        "Numeric": "number",
+        "Numeric": "number", //double
         "Memo": "text",
-        "Decimal": "number",
-        "Date": "date",
-        "DateTime": "date",
+        "Decimal": "number", //double
+        "Date": "date", //double
+        "DateTime": "date", //double
         "Table": "text"
     };
 
@@ -35,7 +35,7 @@
                 $("#fileCabinet").change(updateFromFileCabinet);
                 $("#dialog").change(updateFromDialog);
                 
-                console.log(dwInfos);
+                //console.log(dwInfos);
             }
         );
         $.post('GetUserExtractions',
@@ -65,17 +65,17 @@
     });
 
     var isValid = (function () {
-        var rg1 = /^[^\\/:\*\?"<>\|]+$/; // forbidden characters \ / : * ? " < > |
-        var rg2 = /^\./; // cannot start with dot (.)
-        var rg3 = /^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
+        let rg1 = /^[^\\/:\*\?"<>\|]+$/; // forbidden characters \ / : * ? " < > |
+        let rg2 = /^\./; // cannot start with dot (.)
+        let rg3 = /^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
         return function isValid(fname) {
             return rg1.test(fname) && !rg2.test(fname) && !rg3.test(fname);
         }
     })();
 
     function updateFromOrganization() {
-        var org = $("#organization").val();
-        var lstFileCabinet = $("#fileCabinet");
+        let org = $("#organization").val();
+        let lstFileCabinet = $("#fileCabinet");
 
         lstFileCabinet.empty();
         $.each(dwInfos[org], function (fc, ds) {
@@ -88,9 +88,9 @@
     }
 
     function updateFromFileCabinet() {
-        var org = $("#organization").val();
-        var fc = $("#fileCabinet").val();
-        var lstDialog = $("#dialog");
+        let org = $("#organization").val();
+        let fc = $("#fileCabinet").val();
+        let lstDialog = $("#dialog");
 
         lstDialog.empty();
         $.each(dwInfos[org][fc], function (d, fs) {
@@ -103,7 +103,7 @@
     }
 
     function updateFromDialog() {
-        var maxLines = Object.keys(dwInfos[$("#organization").val()][$("#fileCabinet").val()][$("#dialog").val()]).length;
+        let maxLines = Object.keys(dwInfos[$("#organization").val()][$("#fileCabinet").val()][$("#dialog").val()]).length;
         while ($('tr').length > maxLines+1) {
             $('tr')[maxLines].remove();
         }
@@ -113,10 +113,10 @@
     }
 
     function updateDwFields(select) {
-        var org = $("#organization").val();
-        var fc = $("#fileCabinet").val();
-        var dia = $("#dialog").val();
-        var selectFields = $(select);
+        let org = $("#organization").val();
+        let fc = $("#fileCabinet").val();
+        let dia = $("#dialog").val();
+        let selectFields = $(select);
         selectFields.empty();
         $.each(dwInfos[org][fc][dia], function (f, infos) {
             $("<option />")
@@ -124,21 +124,37 @@
                 .html(infos[0])
                 .appendTo(selectFields);
         });
-
-        //selectFields.focus(onFocusField(selectFields));
-        console.log(selectFields.parent().parent().attr('id'));
+        
         selectFields.unbind('change');
-        selectFields.change(function () { onChangeField(selectFields.parent().parent().attr('id')) }).change(); //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<dfkyguidfgviudgiufgvidfyvg
-        //.attr("type", dwTypeMatch[infos[1]])
+        selectFields.change(function () { onChangeField(selectFields.parent().parent().attr('id')) }).change();
     }
 
     function onChangeField(rowNumber){
-        var org = $("#organization").val();
-        var fc = $("#fileCabinet").val();
-        var dia = $("#dialog").val();
-        console.log($(`#selectFields${rowNumber}`).val());
-        console.log(dwTypeMatch[dwInfos[org][fc][dia][$(`#selectFields${rowNumber}`).val()][1]]);
-        $(`#value${rowNumber}`).attr("type", dwTypeMatch[dwInfos[org][fc][dia][$(`#selectFields${rowNumber}`).val()][1]])
+        let org = $("#organization").val();
+        let fc = $("#fileCabinet").val();
+        let dia = $("#dialog").val();
+        let fieldType = dwTypeMatch[dwInfos[org][fc][dia][$(`#selectFields${rowNumber}`).val()][1]];
+        $(`.tdValues${rowNumber}`).remove();
+        if (fieldType == "text") {
+            $(`#${rowNumber}`).append(`
+                <td colspan="2" class="tdValues${rowNumber}">
+                    <input type="text" class="form-control" id="value${rowNumber}"/>
+                </td>
+            `);
+            $(`#value${rowNumber}`).attr("type", fieldType)
+        }
+        else {
+            $(`#${rowNumber}`).append(`
+                <td class="tdValues${rowNumber}">
+                    <input type="text" class="form-control" id="valueFrom${rowNumber}" />
+                </td>
+                <td class="tdValues${rowNumber}">
+                    <input type="text" class="form-control" id="valueTo${rowNumber}" />
+                </td>
+            `);
+            $(`#valueFrom${rowNumber}`).attr("type", fieldType)
+            $(`#valueTo${rowNumber}`).attr("type", fieldType)
+        }
     }
 
     function addNewField() {
@@ -147,15 +163,15 @@
             return;
         }
         
-        var rowNumber = $('#lastRow').prev().length ? parseInt($('#lastRow').prev().attr('id'))+1 : 1;
+        let rowNumber = $('#lastRow').prev().length ? parseInt($('#lastRow').prev().attr('id'))+1 : 1;
         
-        var newRow = $(`
+        let newRow = $(`
             <tr id="${rowNumber}">
                 <td><a id="removeButton${rowNumber}" role="button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></td>
                 <td>
                     <div class="custom-control custom-checkbox">
                         <input type="checkbox" class="custom-control-input " id="check${rowNumber}">
-                        <label class="custom-control-label" for="check${rowNumber}">Position: </label>
+                        <label class="custom-control-label" for="check${rowNumber}"></label>
                     </div>
                 </td>
                 <td>
@@ -165,9 +181,8 @@
                     <select class="form-control form-select" id="selectFields${rowNumber}">
                     </select>
                 </td>
-                <td>
-                    <input type="text" class="form-control" id="value${rowNumber}"/>
-                </td>
+                <div id="values${rowNumber}">
+                </div>
             </tr>
         `);
         newRow.insertBefore($('#lastRow'));
@@ -187,10 +202,6 @@
 
     }
 
-    //function removeField(button) {
-    //    button.css("color", "red");
-    //}
-
     function checkHierachy() {
 
     }
@@ -199,45 +210,50 @@
 
     }
 
+    function downloadZip() {
+        // verifier les champs doublons
+    }
+
 </script>
 <div class="mb-3 row justify-content-center">
-    <label class="col-md-3 col-form-label">Extraction :</label>
-    <div class="col-md-6">
+    <label class="col-md-4 col-form-label">Extraction :</label>
+    <div class="col-md-8">
         <select class="form-control form-select" id="extraction">
             <option value="newExtraction" selected>Nouvelle extraction</option>
         </select>
     </div>
 </div>
 <div class="mb-3 row justify-content-center">
-    <label class="col-md-3 col-form-label">Nom de l'extraction :</label>
-    <div class="col-md-6">
+    <label class="col-md-4 col-form-label">Nom de l'extraction :</label>
+    <div class="col-md-8">
         <input id="nameExtraction" type="text" class="form-control" placeholder="Nom" />
     </div>
-    @*<label class="col-md-3 text-danger" id="nameFeedBack">Veuillez saisir un nom valide pour la nouvelle extraction</label> Trouver le bon input*@
+    @*<label class="col-md-4 text-danger" id="nameFeedBack">Veuillez saisir un nom valide pour la nouvelle extraction</label> Trouver le bon input*@
 </div>
 <div class="mb-3 row justify-content-center">
-    <label class="col-md-3 col-form-label">Organisation :</label>
-    <div class="col-md-6">
+    <label class="col-md-4 col-form-label">Organisation :</label>
+    <div class="col-md-8">
         <select class="form-control form-select" id="organization"></select>
     </div>
 </div>
 <div class="mb-3 row justify-content-center">
-    <label class="col-md-3 col-form-label">Armoire :</label>
-    <div class="col-md-6">
+    <label class="col-md-4 col-form-label">Armoire :</label>
+    <div class="col-md-8">
         <select class="form-control form-select" id="fileCabinet"></select>
     </div>
 </div>
 <div class="mb-3 row justify-content-center">
-    <label class="col-md-3 col-form-label">Boite de recherche :</label>
-    <div class="col-md-6">
+    <label class="col-md-4 col-form-label">Boite de recherche :</label>
+    <div class="col-md-8">
         <select class="form-control form-select" id="dialog"></select>
     </div>
 </div>
 <div class="mb-3 row justify-content-center">
-    <div class="col-md-9">
+    <div class="col-md-12">
         <table class="table table-hover table-bordered" id="fieldList">
             <thead>
-                <tr><th scope="col"></th>  <th scope="col" colspan="2">Arborescence</th> <th scope="col">Champs</th> <th scope="col">Valeurs</th></tr>
+                <tr><th scope="col" style="width: 7%"></th> <th scope="col" colspan="2" style="width: 18%">Arborescence</th> <th scope="col" style="width: 25%">Champs</th> <th scope="col" colspan="2" style="width: 50%">Valeurs</th></tr>
+                <tr><th scope="col"></th> <th scope="col"></th> <th scope="col" style="width: 12%">Position</th> <th scope="col"></th> <th scope="col" style="width: 25%">De :</th> <th scope="col" style="width: 25%">A :</th></tr>
             </thead>
             <tbody>
                 <tr id="lastRow">
@@ -246,14 +262,14 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-square"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
                         </a>
                     </td>
-                    <td colspan="4"></td>
+                    <td colspan="5"></td>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
 <div class="mb-3 row justify-content-center justify-content-center">
-    <div class="col-md-9">
+    <div class="col-md-12">
         <div class="custom-control custom-switch">
             <input type="checkbox" class="custom-control-input" id="publicSwitch">
             <label class="custom-control-label" for="publicSwitch">Rendre cette extraction publique (tout les utilisateur de DocuDownload la verront)</label>
@@ -265,4 +281,5 @@
     <p class="col-md-1"></p>
     <button class="btn btn-primary "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-save"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Enregistrer l'extraction</button>
 </div>
+
 

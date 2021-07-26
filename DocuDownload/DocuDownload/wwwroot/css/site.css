@@ -56,7 +56,3 @@ body {
     border: 1px solid #ced4da;
 }
 
-.table > tbody > tr > td:nth-child(1), .table > tbody > tr > th:nth-child(1) {
-    width: 60px;
-    height: 60px;
-}
