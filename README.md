@@ -1,2 +1,2 @@
 # DocuDownload
-Application Web pour télécharger une archive .zip contenant un ensemble de documents provenants d'une armoire Docuware.
+Unfinished project that use the DocuWare API to download a set of documents in a .zip format.
